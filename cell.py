@@ -8,6 +8,7 @@ C_PLAYER = 'player'
 C_GUN = 'gun'
 C_GOAL = 'goal'
 C_MOVE = 'move'
+C_OBSTACLE = 'obstacle'
 
 # directions for the gun
 D_UP = 'up'
@@ -17,14 +18,22 @@ D_DOWN = 'down'
 
 class BulletSprite(object):
     _SPEED = 500
-    def __init__(self, pos):
+    def __init__(self, pos, direction):
         self.image = pygame.Surface((CSIZE - 2 * OUTLINE, CSIZE - 2 * OUTLINE))
         self.image.fill(OTHERCOL)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-    
+        self.direction = direction
     def update(self, dt):
-        self.rect.x += self._SPEED * dt
+        if self.direction == D_RIGHT:
+            self.rect.x += self._SPEED * dt
+        elif self.direction == D_LEFT:
+            self.rect.x -= self._SPEED * dt
+        elif self.direction == D_UP:
+            self.rect.y -= self._SPEED * dt
+        elif self.direction == D_DOWN:
+            self.rect.y += self._SPEED * dt
+
 
 class CellSprite(object):
     """Base class, a sprite that is confined to a cell"""
@@ -36,6 +45,8 @@ class CellSprite(object):
         self.rect = self.image.get_rect()
         self.rect.topleft = (self.pos[0] * CSIZE + OUTLINE, 
                              self.pos[1] * CSIZE + OUTLINE)
+        # can we move onto the sprite?
+        self.canmove = True
 
     def update(self, dt):
         pass
@@ -46,19 +57,27 @@ class GunCellSprite(CellSprite):
         self.ctype = C_GUN
         self.direction = kwargs['direction']
         self.image = rstore.images['arrow' + self.direction]
+        self.canmove = False
 
 class GoalCellSprite(CellSprite):
     def __init__(self, pos):
         super(GoalCellSprite, self).__init__(pos)
         self.ctype = C_GOAL
         self.image.fill(GCOL)
-#        self.image = rstore.images['goal']
+
+class ObstacleCellSprite(CellSprite):
+    def __init__(self, pos):
+        super(ObstacleCellSprite, self).__init__(pos)
+        self.ctype = C_OBSTACLE
+        self.image.fill(BLACK)
+        self.canmove = False
 
 class PlayerCellSprite(CellSprite):
     def __init__(self, pos, **kwargs):
         super(PlayerCellSprite, self).__init__(pos)
         self.ctype = C_PLAYER
         self.health = kwargs['health']
+        self.canmove = False
         # can be selected (clicked on)
         self.selected = False
         # image for when cell selected and when cell not selected
@@ -110,16 +129,19 @@ class PlayerMoveCellSprite(CellSprite):
             self.on = not self.on
             self.set_image()
 
+
 # mapping of cell type to class object
 CMAP = {C_PLAYER: PlayerCellSprite,
         C_GUN: GunCellSprite,
         C_GOAL: GoalCellSprite,
-        C_MOVE: PlayerMoveCellSprite}
+        C_MOVE: PlayerMoveCellSprite,
+        C_OBSTACLE: ObstacleCellSprite}
 
 
 # mapping of input symbol in text file to cell type and any other
 # parameters needed in constructor.
 IMAP = {'E': (C_GOAL, {}),
+        'O': (C_OBSTACLE, {}),
         # wasd are guns shooting in the expected directions
         'W': (C_GUN, {'direction': D_UP}),
         'A': (C_GUN, {'direction': D_LEFT}),

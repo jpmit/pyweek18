@@ -1,5 +1,8 @@
+# some 'fun level'
+
 OOOOOSEE
 XXXXXXXE
 X4444XOO
 E111XX1X
 EEEE
+

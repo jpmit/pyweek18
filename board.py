@@ -12,24 +12,45 @@ _BSIZE = (NX * CSIZE, NY * CSIZE)
 _FILL_COL = (224, 224, 224)
 
 # grid surface to show grid lines
-gridsurf = pygame.Surface((_BSIZE[0] + 1, _BSIZE[1] + 1))
-gridsurf.fill(_FILL_COL)
+_gridsurf = pygame.Surface((_BSIZE[0] + 1, _BSIZE[1] + 1))
+_gridsurf.fill(_FILL_COL)
+
 # board surface
 bsurf = pygame.Surface((_BSIZE[0] + 1, _BSIZE[1] + 1))
 bsurf.set_colorkey(_FILL_COL)
 brect = bsurf.get_rect()
 
+def draw_board(board, bullets):
+    """Draw the state of the board and any bullets to the board surface."""
+    if SHOWGRID:
+        bsurf.blit(_gridsurf, (0, 0))
+    else:
+        bsurf.fill(_FILL_COL)
+    # goal cells
+    for c in board.get_goal_cells():
+        bsurf.blit(c.image, c.rect)
+    # player / enemy cells
+    for c in board.get_cells():
+        bsurf.blit(c.image, c.rect)
+    # move cells
+    for c in board.get_move_cells():
+        bsurf.blit(c.image, c.rect)            
+    # enemy 'bullets'
+    for b in bullets:
+        bsurf.blit(b.image, b.rect)
+
+
 def draw_grid(size):
     """size is (nx, ny) where nx is number of cells in x direction."""
-    global gridsurf
+    global _gridsurf
     # total size of the grid in px
     pxsize = (size[0] * CSIZE, size[1] * CSIZE)
     for i in range(size[0] + 1):
-        pygame.draw.line(gridsurf, GREY1, (i * CSIZE, 0), (i * CSIZE, pxsize[1]))
+        pygame.draw.line(_gridsurf, GREY1, (i * CSIZE, 0), (i * CSIZE, pxsize[1]))
     for j in range(size[1] + 1):
-        pygame.draw.line(gridsurf, GREY1, (0, j * CSIZE), (pxsize[0], j * CSIZE))
+        pygame.draw.line(_gridsurf, GREY1, (0, j * CSIZE), (pxsize[0], j * CSIZE))
 
-def clicked_board(pos):
+def pos_on_board(pos):
     return (pos[0] > XOFF and pos[0] < _BSIZE[0] + XOFF 
             and pos[1] > YOFF and pos[1] < _BSIZE[1] + YOFF)
 
@@ -49,14 +70,12 @@ class GameBoard(object):
         # move cells
         self._move_cells = {}
 
-        # number of bits 'saved' (got to goal)
-        self.saved = 0
         self.selected = None
 
     def load_board(self, fname):
         lines = open(fname, 'r').readlines()
         row = 0
-        self._size = (len(lines[0]), len(lines))
+        self._size = (len(lines[0].strip()), len(lines))
         for line in lines:
             col = 0
             for c in line.strip():
@@ -68,6 +87,11 @@ class GameBoard(object):
                         self.add_cell([col, row], ctype, **kw)
                 col += 1
             row += 1
+
+        # set number saved, lost and total number of moves
+        self.nsaved = 0
+        self.nlost = 0
+        self.nmoves = 0
         
         # move this somewhere else?
         draw_grid(self._size)
@@ -150,6 +174,11 @@ class GameBoard(object):
         k = '{0}-{1}'.format(pos[0], pos[1])
         if k in self._cells:
             del self._cells[k]
+    
+    def remove_goal_cell(self, pos):
+        k = '{0}-{1}'.format(pos[0], pos[1])
+        if k in self._goal_cells:
+            del self._goal_cells[k]
 
     def get_cell_from_key(self, key):
         k = key.split('-')
@@ -185,9 +214,11 @@ class GameBoard(object):
         # we can always move to an adjacent goal cell
         if self.is_goal_cell(cto):
             return True
-        # we can't move onto an existing player cell
-        if self.is_player_cell(cto):
+        # is there a cell at the destination that we can't move onto?
+        c = self.get_cell(cto)
+        if c and not c.canmove:
             return False
+
         # otherwise check possible move is adjacent to another player cell
         x, y = cto
         for p in [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]:
@@ -218,12 +249,15 @@ class GameBoard(object):
         self.remove_cell(self.selected)
         # add the new cell or remove if we got to goal
         if self.is_goal_cell(pos):
-            self.saved += 1
+            self.nsaved += 1
+            # remove the goal cell (might take this out later)
+            self.remove_goal_cell(pos)
         else:
             self.add_cell(pos, cell.C_PLAYER, **{'health': c.health})
         # get rid of the move cells
         self.delete_move_cells()
         self.selected = None
+        self.nmoves += 1
 
     def set_selected(self, pos):
         # unselect any previously selected cell

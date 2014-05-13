@@ -36,3 +36,5 @@ YOFF = 80
 # show the grid?
 SHOWGRID = True
 
+HUD_SIZE = (200, 400)
+HUD_POS = (500, 80)
