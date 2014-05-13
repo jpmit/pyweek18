@@ -8,6 +8,7 @@ import board
 import hud
 import cell
 import rstore
+import tutorial
 
 class Scene(object):
     """Abstract base class."""
@@ -54,7 +55,7 @@ class PlayScene(Scene):
     def load_level(self):
         # load the data onto the board
         fname = 'l{0}.txt'.format(self.levnum)
-        self._board.load_board(_get_level(fname))
+        self._board.setup_board(_get_level(fname))
         # update the HUD
         self._hud.set_data(self.levnum)
         # reset any game state
@@ -63,6 +64,10 @@ class PlayScene(Scene):
         self._bullets = []
         # store clicked board cell
         self._clickcell = None
+        # cell positions of any bits the tutorial wants to flash
+        self._tutflash = []
+        # load the relevant tutorial
+        self._tutorial = tutorial.get_tutorial(self)
 
         self.next = self
 
@@ -74,8 +79,9 @@ class PlayScene(Scene):
 
     def mouseup_board(self, pos):
         if (board.get_clicked_cell(pos) == self._clickcell):
-            self.handle_board_click(self._clickcell)
-            self._clickcell = None
+            if self._tutorial.is_allowed(self._clickcell):
+                self.handle_board_click(self._clickcell)
+                self._clickcell = None
 
     def mousedown_board(self, pos):
         self._clickcell = board.get_clicked_cell(pos)
@@ -88,6 +94,13 @@ class PlayScene(Scene):
         pass
 
     def mousedown_hud(self, pos):
+        pass
+
+    def mousedown_tutorial(self, pos):
+        pass
+
+    def mouseup_tutorial(self, pos):
+        self._tutorial.try_advance()
         pass
 
     def mouseover_board(self, pos):
@@ -106,12 +119,16 @@ class PlayScene(Scene):
 
         for ev in events:
             if (ev.type == pl.MOUSEBUTTONDOWN):
-                if board.pos_on_board(ev.pos):
+                if tutorial.pos_on_tutorial(ev.pos):
+                    self.mousedown_tutorial(ev.pos)
+                elif board.pos_on_board(ev.pos):
                     self.mousedown_board(ev.pos)
                 elif hud.pos_on_hud(ev.pos):
                     self.mousedown_hud(ev.pos)
             elif (ev.type == pl.MOUSEBUTTONUP):
-                if board.pos_on_board(ev.pos):
+                if tutorial.pos_on_tutorial(ev.pos):
+                    self.mouseup_tutorial(ev.pos)
+                elif board.pos_on_board(ev.pos):
                     self.mouseup_board(ev.pos)
                 elif hud.pos_on_hud(ev.pos):
                     self.mouseup_hud(ev.pos)
@@ -130,10 +147,12 @@ class PlayScene(Scene):
             self._hud.set_moves(self._board.nmoves)
             self._hud.set_saved(self._board.nsaved)
             self.finish_player_move()
+        elif self._board.is_player_cell(pos):
+            self.game.juke.play_sfx('click')
+            self._board.set_selected(pos)
         else:
-            if self._board.is_player_cell(pos):
-                self.game.juke.play_sfx('click')
-                self._board.set_selected(pos)
+            pass
+            #self.game.juke.play_sfx('error')
 
     def finish_player_move(self):
         """Called at the end of the player move"""
@@ -162,6 +181,22 @@ class PlayScene(Scene):
             self.update_player(dt)
         else:
             self.update_opponent(dt)
+
+        # update tutorial
+        if self._tutorial.changed:
+            # set any currently flashing bits to not flash
+            for cpos in self._tutflash:
+                c = self._board.get_cell(cpos)
+                c.set_flash(False)
+            self._tutflash = []
+            # check if there are any new bits to flash
+            allowed_pos = self._tutorial.get_allowed_cells()
+            for cpos in allowed_pos:
+                if self._board.is_player_cell(cpos):
+                    self._tutflash.append(cpos)
+                    c = self._board.get_cell(cpos)
+                    c.set_flash(True)
+        self._tutorial.update(dt)
     
     def update_player(self, dt):
         if not self._board.can_move():
@@ -206,11 +241,17 @@ class PlayScene(Scene):
         # render to the HUD surface
         self._hud.draw()
 
+        # render to the tutorial surface
+        tutorial.draw_tutorial(self._tutorial)
+
         # blit the board surface to the screen
         screen.blit(board.bsurf, (XOFF, YOFF))
 
         # blit the hud surface to the screen
         screen.blit(hud.hsurf, HUD_POS)
+
+        # blit the tutorial surface to the screen
+        screen.blit(tutorial.tsurf, TUT_POS)
         pass
 
 class LevelCompleteScene(Scene):

@@ -62,6 +62,9 @@ class GameBoard(object):
     def __init__(self):
 
         # player and enemy cells, dict keys are 'x-y' where x and y are cell indices
+        pass
+
+    def setup_board(self, fname):
         self._cells = {}
 
         # goal cells
@@ -72,7 +75,18 @@ class GameBoard(object):
 
         self.selected = None
 
-    def load_board(self, fname):
+        # set number saved, lost and total number of moves
+        self.nsaved = 0
+        self.nlost = 0
+        self.nmoves = 0
+
+        # get board state from file
+        self.read_board_state(fname)
+        
+        # move this somewhere else?
+        draw_grid(self._size)
+
+    def read_board_state(self, fname):
         lines = open(fname, 'r').readlines()
         row = 0
         self._size = (len(lines[0].strip()), len(lines))
@@ -87,14 +101,6 @@ class GameBoard(object):
                         self.add_cell([col, row], ctype, **kw)
                 col += 1
             row += 1
-
-        # set number saved, lost and total number of moves
-        self.nsaved = 0
-        self.nlost = 0
-        self.nmoves = 0
-        
-        # move this somewhere else?
-        draw_grid(self._size)
 
     def add_cell(self, pos, ctype, **kwargs):
         """Add a player/enemy cell."""

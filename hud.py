@@ -14,12 +14,15 @@ def pos_on_hud(pos):
     return (pos[0] > HUD_POS[0] and pos[0] < HUD_POS[0] + HUD_SIZE[0] 
             and pos[1] > HUD_POS[1] and pos[1] < HUD_POS[1] + HUD_SIZE[1])
 
+
 class Hud(object):
     def __init__(self, board):
         self._board = board
         self.smallfont = rstore.fonts['hudsmall']
         self.largefont = rstore.fonts['hudlarge']
         self.set_data(0)
+
+        # get buttons
 
     def set_data(self, lnum):
         self.set_text(lnum)

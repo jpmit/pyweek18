@@ -73,6 +73,8 @@ class ObstacleCellSprite(CellSprite):
         self.canmove = False
 
 class PlayerCellSprite(CellSprite):
+    # we only flash to help the tutorial
+    _FLASHTIME = 0.8
     def __init__(self, pos, **kwargs):
         super(PlayerCellSprite, self).__init__(pos)
         self.ctype = C_PLAYER
@@ -80,8 +82,15 @@ class PlayerCellSprite(CellSprite):
         self.canmove = False
         # can be selected (clicked on)
         self.selected = False
+        # the scene sets me to flash
+        self.set_flash(False)
         # image for when cell selected and when cell not selected
         self.set_image()
+
+    def set_flash(self, fl):
+        self.tstate = 0
+        self.on = True
+        self.flashing = fl 
     
     def set_image(self):
         # draw the health value to the middle of the 
@@ -95,11 +104,19 @@ class PlayerCellSprite(CellSprite):
             self.image.set_alpha(128)
         else:
             self.image.fill(pygame.Color(PCOL[self.health]))
-            self.image.set_alpha(255)
+            if self.on:
+                self.image.set_alpha(255)
+            else: # for tutorial
+                self.image.set_alpha(0)
 
         self.image.blit(txt, (0, 0))
     
     def update(self, dt):
+        if self.flashing:
+            self.tstate += dt
+            if (self.tstate > self._FLASHTIME):
+                self.tstate = 0
+                self.on = not self.on
         self.set_image()
 
 class PlayerMoveCellSprite(CellSprite):

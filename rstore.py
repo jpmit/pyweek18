@@ -19,11 +19,13 @@ images = {'bg': 'paper.png',
 # value is name, size in pts
 fonts = {'main': ('ShareTechMono-Regular.ttf', 30),
          'hudlarge': ('ShareTechMono-Regular.ttf', 40),
-         'hudsmall': ('ShareTechMono-Regular.ttf', 20)}
+         'hudsmall': ('ShareTechMono-Regular.ttf', 20),
+         'tutorial': ('ShareTechMono-Regular.ttf', 20)}
 
 sfx = {'click': 'click.ogg',
        'shoot': 'shoot.ogg',
-       'goal': 'goal.ogg'}
+       'goal': 'goal.ogg',
+       'error': 'error.ogg'}
 
 music = {'reawakening': 'reawakening.ogg'}
 
