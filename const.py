@@ -34,4 +34,5 @@ NY = 12
 XOFF = 80
 YOFF = 80
 # show the grid?
-SHOWGRID = False
+SHOWGRID = True
+

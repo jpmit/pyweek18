@@ -36,102 +36,21 @@ def clicked_board(pos):
 def get_clicked_cell(pos):
     return [(pos[0] - XOFF) / CSIZE, (pos[1] - YOFF) / CSIZE]
 
-class BoardHandler(object):
-    def __init__(self, board):
-        self._board = board
-        # is it the player's move at the moment?
-        self._isplayer = True
-        # bullet sprites
-        self._bullets = []
-
-    def handle_click(self, pos):
-        if not self._isplayer:
-            return
-        c = self._board.get_cell(pos)
-        if c:
-            if (c.ctype == cell.C_MOVE or c.ctype == cell.C_PLAYER):
-                globalobj.get_game().juke.play_sfx('click')
-            if (c.ctype == cell.C_PLAYER):
-                self._board.set_selected(pos)
-            elif (c.ctype == cell.C_MOVE):
-                self._board.make_move(pos)
-                self.finish_player_move()
-
-    def finish_player_move(self):
-        """Called at the end of the player move"""
-        self._isplayer = False
-        # create bullets
-        playercells = self._board.get_cells_by_type(cell.C_PLAYER)
-        guncells = self._board.get_cells_by_type(cell.C_GUN)
-        for g in guncells:
-            p = [g.pos[0] * CSIZE + OUTLINE, g.pos[1] * CSIZE + OUTLINE]
-            if self._board.can_hit(g):
-                self._bullets.append(cell.BulletSprite(p))
-        
-    def finish_opponent_move(self):
-        pass
-
-    def update(self, dt):
-
-        for c in self._board.get_cells():
-            c.update(dt)
-    
-        if self._isplayer:
-            self.update_player(dt)
-        else:
-            self.update_opponent(dt)
-    
-    def update_player(self, dt):
-        if not self._board.can_move():
-            print 'END!'
-            # change scene here
-            pass
-        else:
-            pass
-    
-    def update_opponent(self, dt):
-        # advance bullets
-        playercells = self._board.get_cells_by_type(cell.C_PLAYER)
-        for b in list(self._bullets):
-            b.update(dt)
-            # remove if off screen
-            if not brect.colliderect(b):
-                self._bullets.remove(b)
-            # check for collision with player
-            for p in playercells:
-                if pygame.sprite.collide_rect(b, p):
-                    # we hit the player
-                    self._bullets.remove(b)
-                    p.health -= 1
-                    if (p.health == 0):
-                        self._board.remove_cell(p.pos)
-                
-        # check if all bullets are gone, and if so give player control
-        # back
-        if not self._bullets:
-            self._isplayer = True
-            self.finish_opponent_move()
-
-    def draw(self):
-        if SHOWGRID:
-            bsurf.blit(gridsurf, (0, 0))
-        else:
-            bsurf.fill(_FILL_COL)
-        for c in self._board.get_cells():
-            bsurf.blit(c.image, c.rect)
-        for b in self._bullets:
-            bsurf.blit(b.image, b.rect)
-
 class GameBoard(object):
     """Stores the state and handles manipulation of this state only."""
-    def __init__(self, fname):
+    def __init__(self):
 
-        # dict keys are 'x-y' where x and y are cell indices
+        # player and enemy cells, dict keys are 'x-y' where x and y are cell indices
         self._cells = {}
 
-        self.load_board(fname)
-        # move this somewhere else?
-        draw_grid(self._size)
+        # goal cells
+        self._goal_cells = {}
+
+        # move cells
+        self._move_cells = {}
+
+        # number of bits 'saved' (got to goal)
+        self.saved = 0
         self.selected = None
 
     def load_board(self, fname):
@@ -143,9 +62,61 @@ class GameBoard(object):
             for c in line.strip():
                 if c != 'X':
                     ctype, kw = cell.IMAP[c] 
-                    self.add_cell([col, row], ctype, **kw)
+                    if c == 'E':
+                        self.add_goal_cell([col, row])
+                    else:
+                        self.add_cell([col, row], ctype, **kw)
                 col += 1
             row += 1
+        
+        # move this somewhere else?
+        draw_grid(self._size)
+
+    def add_cell(self, pos, ctype, **kwargs):
+        """Add a player/enemy cell."""
+        if kwargs:
+            c = cell.CMAP[ctype](pos, **kwargs)
+        else:
+            c = cell.CMAP[ctype](pos)
+
+        self._cells['{0}-{1}'.format(pos[0], pos[1])] = c
+
+    def add_goal_cell(self, pos):
+        """Add a goal cell."""
+        c = cell.CMAP[cell.C_GOAL](pos)
+        self._goal_cells['{0}-{1}'.format(pos[0], pos[1])] = c
+
+    def add_move_cell(self, pos):
+        """Add a move cell."""
+        if self.is_goal_cell(pos):
+            kw = {'flash': True}
+        else:
+            kw = {'flash': False}
+        m = cell.CMAP[cell.C_MOVE](pos, **kw)
+        self._move_cells['{0}-{1}'.format(pos[0], pos[1])] = m
+
+    def get_cells(self):
+        """Return list of all permanent cell objects."""
+        return self._cells.values()
+    
+    def get_move_cells(self):
+        """Return list of all move cell objects."""
+        return self._move_cells.values()
+
+    def get_goal_cells(self):
+        return self._goal_cells.values()
+    
+    def is_player_cell(self, pos):
+        c = self.get_cell(pos)
+        if (c and c.ctype == cell.C_PLAYER):
+            return True
+        return False
+
+    def is_move_cell(self, pos):
+        return '{0}-{1}'.format(pos[0], pos[1]) in self._move_cells
+
+    def is_goal_cell(self, pos):
+        return '{0}-{1}'.format(pos[0], pos[1]) in self._goal_cells
 
     def can_hit(self, g):
         """Return true if gun cell can hit player, false otherwise."""
@@ -164,14 +135,6 @@ class GameBoard(object):
                 if (g.pos[1] == p.pos[1]) and (g.pos[0] < p.pos[0]):
                     return True
         return False
-    
-    def add_cell(self, pos, ctype, **kwargs):
-        if kwargs:
-            c = cell.CMAP[ctype](pos, **kwargs)
-        else:
-            c = cell.CMAP[ctype](pos)
-
-        self._cells['{0}-{1}'.format(pos[0], pos[1])] = c
 
     def can_move(self):
         """Is a move possible?"""
@@ -188,6 +151,10 @@ class GameBoard(object):
         if k in self._cells:
             del self._cells[k]
 
+    def get_cell_from_key(self, key):
+        k = key.split('-')
+        return self.get_cell(int(k[0]), int(k[1]))
+
     def get_cell(self, pos):
         k = '{0}-{1}'.format(pos[0], pos[1])
         if k in self._cells:
@@ -199,10 +166,6 @@ class GameBoard(object):
         if c and (c.ctype == ctype):
             return True
         return False
-
-    def get_cells(self):
-        """Return list of cell objects."""
-        return self._cells.values()
     
     def get_cells_by_type(self, ctype):
         cs = []
@@ -211,25 +174,33 @@ class GameBoard(object):
                 cs.append(c)
         return cs
 
-    def delete_moves(self):
+    def delete_move_cells(self):
         """Remove possible move cells from the board."""
-        for c in self.get_cells():
-            if (c.ctype == cell.C_MOVE):
-                self.remove_cell(c.pos)
+        self._move_cells = {}
+
+    def is_valid_move(self, cfrom, cto):
+        # don't allow movements off the grid!
+        if (cto[0] >= self._size[0] or cto[1] >= self._size[1]):
+            return False
+        # we can always move to an adjacent goal cell
+        if self.is_goal_cell(cto):
+            return True
+        # we can't move onto an existing player cell
+        if self.is_player_cell(cto):
+            return False
+        # otherwise check possible move is adjacent to another player cell
+        x, y = cto
+        for p in [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]:
+            if (self.is_player_cell(p) and p != cfrom):
+                return True
     
     def get_moves(self, pos):
         add_moves = []
+        # look at all adjacent cells
         for x in [pos[0] - 1, pos[0], pos[0] + 1]:
             for y in [pos[1] - 1, pos[1], pos[1] + 1]:
-                if (x >= 0) and (x < self._size[0]) and (y >= 0) and (y < self._size[1]):
-                    c = self.get_cell([x, y])
-                    if c and c.ctype != cell.C_GOAL:
-                        continue
-                    # check if possible move is adjacent to a player cell
-                    for p in [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]:
-                        if (self.is_ctype(p, cell.C_PLAYER) and p != pos):
-                            add_moves.append([x, y])
-                            break
+                if self.is_valid_move(pos, [x, y]):
+                    add_moves.append([x, y])
         return add_moves
 
     def add_moves(self, sel):
@@ -237,29 +208,35 @@ class GameBoard(object):
 
         addpos = self.get_moves(sel)
         for pos in addpos:
-            self.add_cell(pos, cell.C_MOVE)
+            self.add_move_cell(pos)
     
     def make_move(self, pos):
-        """Make a move to pos. From is given by self.selected."""
-        # replace the cell at move to position with a player
+        """Make a player move from self.selected to pos."""
+        # the cell we want to move
         c = self.get_cell(self.selected)
-        self.remove_cell(pos)
-        self.add_cell(pos, cell.C_PLAYER, **{'health': c.health})
+        # remove the selected cell
         self.remove_cell(self.selected)
-        # get rid of the possible move cells that weren't selected
-        self.delete_moves()
+        # add the new cell or remove if we got to goal
+        if self.is_goal_cell(pos):
+            self.saved += 1
+        else:
+            self.add_cell(pos, cell.C_PLAYER, **{'health': c.health})
+        # get rid of the move cells
+        self.delete_move_cells()
         self.selected = None
 
     def set_selected(self, pos):
+        # unselect any previously selected cell
         if self.selected:
             self.get_cell(self.selected).selected = False
 
         # delete any previous moves cells
-        self.delete_moves()
-            
+        self.delete_move_cells()
+
         # if we clicked on the currently selected cell, unselect it
         if pos == self.selected:
             self.selected = None
+        # otherwise select the new cell
         else:
             c = self.get_cell(pos)
             c.selected = True

@@ -84,11 +84,31 @@ class PlayerCellSprite(CellSprite):
         self.set_image()
 
 class PlayerMoveCellSprite(CellSprite):
-    def __init__(self, pos):
+    _FLASHTIME = 0.8
+    def __init__(self, pos, **kwargs):
         super(PlayerMoveCellSprite, self).__init__(pos)
         self.ctype = C_MOVE
-        self.image.fill(MOVCOL)
+        self.flashing = kwargs['flash']
+        # time in the current state (only relevant if flashing).
+        self.tstate = 0
+        self.on = True
+        self.set_image()
 
+    def set_image(self):
+        if self.on:
+            self.image.fill(MOVCOL)
+            self.image.set_alpha(255)
+        else:
+            self.image.set_alpha(0)
+
+    def update(self, dt):
+        if not self.flashing:
+            return
+        self.tstate += dt
+        if (self.tstate > self._FLASHTIME):
+            self.tstate = 0
+            self.on = not self.on
+            self.set_image()
 
 # mapping of cell type to class object
 CMAP = {C_PLAYER: PlayerCellSprite,
