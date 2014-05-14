@@ -69,7 +69,7 @@ class ObstacleCellSprite(CellSprite):
     def __init__(self, pos):
         super(ObstacleCellSprite, self).__init__(pos)
         self.ctype = C_OBSTACLE
-        self.image.fill(BLACK)
+        self.image.fill(PINK)
         self.canmove = False
 
 class PlayerCellSprite(CellSprite):

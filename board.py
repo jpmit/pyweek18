@@ -5,22 +5,37 @@ from const import *
 import globalobj
 import cell
 
-# board x and y dimensions (in pixels)
-_BSIZE = (NX * CSIZE, NY * CSIZE)
-
 # this makes a different since we are using alpha transparency
 _FILL_COL = (224, 224, 224)
 
 # grid surface to show grid lines
-_gridsurf = pygame.Surface((_BSIZE[0] + 1, _BSIZE[1] + 1))
+_gridsurf = pygame.Surface((0, 0))
 _gridsurf.fill(_FILL_COL)
 
 # board surface
-bsurf = pygame.Surface((_BSIZE[0] + 1, _BSIZE[1] + 1))
-bsurf.set_colorkey(_FILL_COL)
+bsurf = pygame.Surface((0, 0))
 brect = bsurf.get_rect()
+# size of board surface in pixels
+_bsize = bsurf.get_size()
+
+def pos_on_board(pos):
+    # note top left of board is at position (XOFF, YOFF)
+    return (pos[0] > XOFF and pos[0] < _bsize[0] + XOFF 
+            and pos[1] > YOFF and pos[1] < _bsize[1] + YOFF)
+
+
+def resize_board_and_grid_surfaces(size):
+    """As described.  Note size is (nx, ny) where nx is number of cells in x direction."""
+    global bsurf, brect, _gridsurf, _bsize
+    # +1 allows for the edge of the grid
+    bsurf = pygame.Surface((size[0] * CSIZE + 1, size[1] * CSIZE + 1))
+    brect = bsurf.get_rect()
+    _bsize = bsurf.get_size()
+    _gridsurf = pygame.Surface((size[0] * CSIZE + 1, size[1] * CSIZE + 1))
+    _gridsurf.set_colorkey(_FILL_COL)
 
 def draw_board(board, bullets):
+
     """Draw the state of the board and any bullets to the board surface."""
     if SHOWGRID:
         bsurf.blit(_gridsurf, (0, 0))
@@ -49,10 +64,6 @@ def draw_grid(size):
         pygame.draw.line(_gridsurf, GREY1, (i * CSIZE, 0), (i * CSIZE, pxsize[1]))
     for j in range(size[1] + 1):
         pygame.draw.line(_gridsurf, GREY1, (0, j * CSIZE), (pxsize[0], j * CSIZE))
-
-def pos_on_board(pos):
-    return (pos[0] > XOFF and pos[0] < _BSIZE[0] + XOFF 
-            and pos[1] > YOFF and pos[1] < _BSIZE[1] + YOFF)
 
 def get_clicked_cell(pos):
     return [(pos[0] - XOFF) / CSIZE, (pos[1] - YOFF) / CSIZE]
@@ -84,6 +95,7 @@ class GameBoard(object):
         self.read_board_state(fname)
         
         # move this somewhere else?
+        resize_board_and_grid_surfaces(self._size)
         draw_grid(self._size)
 
     def read_board_state(self, fname):

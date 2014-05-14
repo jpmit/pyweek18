@@ -1,7 +1,7 @@
-# adapted from http://www.pygame.org/wiki/TextWrapping?parent=CookBook
+# adapted from http://www.pygame.org/wiki/TextWrapping?parent=CookBook 
 
 from itertools import chain
- 
+
 def truncline(text, font, maxwidth):
         real=len(text)       
         stext=text           

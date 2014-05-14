@@ -34,7 +34,7 @@ _TUTSTEPS = {0: [
      ["Move the top bit to one of the goal cells.", [[1, 0], [2, 0], [3, 0]]],
     ["Nice!  You just saved a bit.", []],
     ["Now for the other 7...", []],
-    ["By the way, those black cells are obstacles you can't move into.", []],
+    ["By the way, those pink cells are obstacles you can't move into.", []],
     ["Try to save all 8 bits in each level, in as few moves as possible.", []],
     ["Your best score for the current level is shown on the right.", []],
     ["You can switch levels by clicking the arrow buttons on the right.", []],

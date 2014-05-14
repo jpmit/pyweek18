@@ -27,9 +27,9 @@ class PlayScene(Scene):
         self.game = game
 
         self._board = board.GameBoard()
-        self._hud = hud.Hud(self._board)
+        self._hud = hud.Hud(self, self._board)
 
-        self.levnum = 0
+        self.levnum = 1
         self.load_level()
 
     def load_level(self):
@@ -57,12 +57,6 @@ class PlayScene(Scene):
 
         self.next = self
 
-    def pos_on_board(self, pos):
-        return False
-
-    def pos_on_hud(self, pos):
-        return False
-
     def mouseup_board(self, pos):
         if (board.get_clicked_cell(pos) == self._clickcell):
             if self._tutorial.is_allowed(self._clickcell):
@@ -77,13 +71,35 @@ class PlayScene(Scene):
         pass
     
     def mouseup_hud(self, pos):
-        pass
+        if self._tutorial.is_finished():
+            # send the position w.r.t. the top left of the HUD
+            hudpos = (pos[0] - HUD_POS[0], pos[1] - HUD_POS[1])
+            hud_event = self._hud.handle_mouse_up(hudpos)
+            if (hud_event == hud.EVENT_NEXT):
+                if (self.levnum != N_LEVELS):
+                    self.levnum += 1
+                    self.load_level()
+            elif (hud_event == hud.EVENT_PREVIOUS):
+                if (self.levnum != 0):
+                    self.levnum -= 1
+                    self.load_level()
+            elif (hud_event == hud.EVENT_RESET):
+                self.load_level()
+            elif (hud_event == hud.EVENT_MAIN):
+                self.next = TitleScene(self.game)
 
     def mousedown_hud(self, pos):
         pass
-
+            
     def mousedown_tutorial(self, pos):
         pass
+
+    def mouseover_hud(self, pos):
+        # the HUD isn't active until the tutorial is finished
+        if self._tutorial.is_finished():
+            # send the position w.r.t. the top left of the HUD
+            hudpos = (pos[0] - HUD_POS[0], pos[1] - HUD_POS[1])
+            self._hud.handle_cursor_position(hudpos)
 
     def mouseup_tutorial(self, pos):
         if self._tutorial.try_advance():
@@ -97,11 +113,11 @@ class PlayScene(Scene):
         # mouse position
         mpos = pygame.mouse.get_pos()
 
-        # mouse clicks
-        if board.pos_on_board(mpos):
-            self.mouseover_board(mpos)
-        elif hud.pos_on_hud(mpos):
+        # send position to the appropriate handler
+        if hud.pos_on_hud(mpos):
             self.mouseover_hud(mpos)
+        elif board.pos_on_board(mpos):
+            self.mouseover_board(mpos)
 
         for ev in events:
             if (ev.type == pl.MOUSEBUTTONDOWN):
@@ -259,7 +275,7 @@ class StrandedScene(Scene):
 
         self._played_sfx = False
         self._tpassed = 0
-        self._stranded_txt = rstore.fonts['finish'].render('Stranded', False, BLACK)
+        self._stranded_txt = rstore.fonts['finish'].render('Stranded', False, WHITE)
 
         # rate of changing alpha with time for fading out
         self._alpharate = 255 / (self._TTOT - self._DELAY)
@@ -299,7 +315,7 @@ class LevelCompleteScene(Scene):
         self.juke = self.pscene.game.juke
 
         
-        self.complete_txt = rstore.fonts['finish'].render(txt, True, BLACK)
+        self.complete_txt = rstore.fonts['finish'].render(txt, True, WHITE)
         self.high_txt = rstore.fonts['finish'].render('New high score!', True, RED1)
         self.pscene = pscene
         self.tpassed = 0

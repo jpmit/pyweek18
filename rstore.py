@@ -15,10 +15,16 @@ images = {'bg': 'paper.png',
           'arrowdown': 'arrowdown.png',
           'arrowright': 'arrowright.png',
           'arrowup': 'arrowup.png',
-          'hud' : 'hud.png'}
+          'hud' : 'hud.png',
+          'next': 'next.png',
+          'nextsel': 'nextsel.png',
+          'prev': 'prev.png',
+          'prevsel': 'prevsel.png'
+}
 
 # value is name, size in pts
 fonts = {'main': ('ShareTechMono-Regular.ttf', 30),
+         'button': ('ShareTechMono-Regular.ttf', 16),
          'hudlarge': ('PGott.ttf', 40),
          'highscore': ('PGott.ttf', 30),
          'hudsmall': ('PGott.ttf', 20),
