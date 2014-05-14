@@ -20,7 +20,7 @@ class BulletSprite(object):
     _SPEED = 500
     def __init__(self, pos, direction):
         self.image = pygame.Surface((CSIZE - 2 * OUTLINE, CSIZE - 2 * OUTLINE))
-        self.image.fill(OTHERCOL)
+        self.image.fill(BULLETCOL)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.direction = direction

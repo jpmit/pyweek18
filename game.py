@@ -46,17 +46,17 @@ class JukeBox(object):
 
         if self.playing != name:
             self.play_music(name)
-    
+
     def stop_music(self):
         pygame.mixer.music.stop()
-    
+
     def play_sfx(self, name):
         if self.soundon and self._sfxon:
             self.sfx[name].play()
 
     def toggle_sfx(self):
         self._sfxon = not self._sfxon
-    
+
     def toggle_music(self):
         if self._musicon:
             self.stop_music()
@@ -75,7 +75,7 @@ class JukeBox(object):
 class Game(object):
     def __init__(self):
         """Setup pygame, display, resource loading etc."""
-        
+
         pygame.init()
         self.screen = pygame.display.set_mode(const.SCREEN_SIZE)
         self.clock = pygame.time.Clock()
@@ -85,7 +85,7 @@ class Game(object):
 
         # high scores
         score.load_high_scores()
-        
+
         self.juke = JukeBox()
 
         self.juke.play_music('reawakening')
@@ -93,7 +93,7 @@ class Game(object):
         pygame.mouse.set_cursor(*pygame.cursors.tri_left)
 
     def toggle_option(self, option_name):
-        """Change option (tutorial, music, sfx)""" 
+        """Change option (tutorial, music, sfx).""" 
         if (option_name == OptionsScene.OPTION_TUTORIAL):
             tutorial.is_active = not tutorial.is_active
         elif (option_name == OptionsScene.OPTION_MUSIC):
@@ -106,10 +106,9 @@ class Game(object):
         return {OptionsScene.OPTION_TUTORIAL: tutorial.isactive,
                 OptionsScene.OPTION_MUSIC: self.juke.is_music_on(),
                 OptionsScene.OPTION_SFX: self.juke.is_sfx_on()}
-        
 
     def mainloop(self):
-        
+
         # first scene of the game
         ascene = TitleScene(self)
 
@@ -144,7 +143,7 @@ class Game(object):
 
             # delay for correct time here.
             dt = self.clock.tick(const.FPS) / 1000.0
-                
+
             if quitevent:
                 ascene = None
                 pygame.quit()

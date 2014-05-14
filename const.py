@@ -1,13 +1,7 @@
-FPS = 30
+FPS = 70
 
 SCREEN_SIZE = (800, 600)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
-GREY1 = (68, 68, 68)
-RED1 = (166, 0, 0)
-BLUE1 = (16, 30, 81)
+
 # some charcoaly colours 
 # for actual charcoal, see encycolorpedia.com/36454f
 PCOL = {
@@ -24,7 +18,16 @@ GCOL = (103, 159, 245)
 PINK = (255, 210, 236)
 GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
-OTHERCOL = (200, 100, 80)
+BULLETCOL = (200, 100, 80)
+
+ORANGEY = (239, 212, 122)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+GREY1 = (68, 68, 68)
+RED1 = (166, 0, 0)
+BLUE1 = (16, 30, 81)
 
 # board cell size in px
 CSIZE = 50
@@ -46,5 +49,3 @@ TUT_LINE_PAD = 4
 TUT_POS = (80, 400)
 
 N_LEVELS = 2
-
-ORANGEY = (239, 212, 122)

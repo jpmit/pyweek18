@@ -1,6 +1,5 @@
-
 class Scene(object):
-    """Abstract base class."""
+    """Base class for all the game scenes."""
 
     def __init__(self):
         # the next property is accessed every iteration of the main
