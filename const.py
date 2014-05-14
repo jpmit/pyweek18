@@ -6,6 +6,7 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 GREY1 = (68, 68, 68)
+RED1 = (166, 0, 0)
 # some charcoaly colours 
 # for actual charcoal, see encycolorpedia.com/36454f
 PCOL = {
@@ -13,7 +14,8 @@ PCOL = {
     2: '#435662',
     3: '#28333b',
     4: '#2f4f4f',
-    5: '#701010'
+    5: '#701010',
+    8: '#701010'
 }
 # color for moves
 MOVCOL = (255, 249, 183)
@@ -44,3 +46,6 @@ TUT_BORDER = 4
 TUT_OFFSET = 4
 TUT_LINE_PAD = 4
 TUT_POS = (80, 400)
+
+N_LEVELS = 3
+

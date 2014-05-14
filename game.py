@@ -3,6 +3,7 @@ import pygame.locals as pl
 
 import time
 import rstore
+import score
 from scene import PlayScene, TitleScene
 import globalobj
 import const
@@ -64,8 +65,13 @@ class Game(object):
 
         # load images, fonts and sounds
         rstore.load_resources()
+
+        # high scores
+        score.load_high_scores()
         
         self.juke = JukeBox()
+
+        self.juke.play_music('reawakening')
 
         pygame.mouse.set_cursor(*pygame.cursors.tri_left)
 

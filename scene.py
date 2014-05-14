@@ -8,6 +8,7 @@ import board
 import hud
 import cell
 import rstore
+import score
 import tutorial
 from basescene import Scene
 
@@ -28,10 +29,8 @@ class PlayScene(Scene):
         self._board = board.GameBoard()
         self._hud = hud.Hud(self._board)
 
-        self.levnum = 0
+        self.levnum = 2
         self.load_level()
-
-        self.game.juke.play_music('reawakening')
 
     def load_level(self):
         # load the data onto the board
@@ -48,7 +47,10 @@ class PlayScene(Scene):
         # cell positions of any bits the tutorial wants to flash
         self._tutflash = []
         # load the relevant tutorial
-        self._tutorial = tutorial.get_tutorial(self)
+        self._tutorial = tutorial.Tutorial(self)
+        # play sound for the start of the tutorial
+        if self._tutorial.step is not None:
+            self.game.juke.play_sfx('turn')
 
         self.next = self
 
@@ -186,10 +188,12 @@ class PlayScene(Scene):
     
     def update_player(self, dt):
         if not self._board.can_move():
-            print 'FINISHED!'
-            self.next = LevelCompleteScene(self)
-            # change scene here
-            pass
+            score = (self._board.nsaved, self._board.nmoves)
+            # level 'complete', change scene
+            if (self._board.nsaved != 8):
+                self.next = StrandedScene(self, score)
+            else:
+                self.next = LevelCompleteScene(self, score)
         else:
             pass
 
@@ -240,26 +244,92 @@ class PlayScene(Scene):
         screen.blit(tutorial.tsurf, TUT_POS)
         pass
 
-class LevelCompleteScene(Scene):
-    def __init__(self, pscene):
-        super(LevelCompleteScene, self).__init__()
+class StrandedScene(Scene):
+    # total time spent in this scene
+    _TTOT = 2
+    # delay before doing anything
+    _DELAY = 0.2
+    def __init__(self, pscene, score):
+        super(StrandedScene, self).__init__()
+        self._pscene = pscene
+        self._score = score
+        self._juke = self._pscene.game.juke
 
+        self._played_sfx = False
+        self._tpassed = 0
+        self._stranded_txt = rstore.fonts['finish'].render('Stranded', False, BLACK)
+
+        # rate of changing alpha with time for fading out
+        self._alpharate = 255 / (self._TTOT - self._DELAY)
+
+    def update(self, dt):
+        self._tpassed += dt
+        # fade text out
+        alpha = max(255 - self._alpharate * self._tpassed, 0)
+        self._stranded_txt.set_alpha(alpha)
+        if self._tpassed > self._TTOT:
+            self.next = LevelCompleteScene(self._pscene, self._score)
+
+    def render(self, screen):
+        self._pscene.render(screen)
+        if (self._tpassed > self._DELAY):
+            screen.blit(self._stranded_txt, (165, 200))
+            if not self._played_sfx:
+                self._juke.play_sfx('stranded')
+                self._played_sfx = True
+
+class LevelCompleteScene(Scene):
+    def __init__(self, pscene, sc):
+        super(LevelCompleteScene, self).__init__()
+        self.pscene = pscene
+        if score.is_better(pscene.levnum, sc):
+            score.update_high_scores(pscene.levnum, sc)
+            self.high = True
+        else:
+            self.high = False
+        self.played_high_sound = False
+        self.played_complete_sound = False
+        if (sc[0] == 8):
+            txt = 'All 8 bits saved!'
+        else:
+            txt = 'Saved {0}/{1} bits'.format(sc[0], 8)
+        # todo: play something different if stranded
+        self.juke = self.pscene.game.juke
+
+        
+        self.complete_txt = rstore.fonts['finish'].render(txt, True, BLACK)
+        self.high_txt = rstore.fonts['finish'].render('New high score!', True, RED1)
         self.pscene = pscene
         self.tpassed = 0
 
     def update(self, dt):
         self.tpassed += dt
-        if self.tpassed > 1:
-            print 'level up'
+        if self.tpassed > 3:
             self.pscene.levnum += 1
             self.pscene.load_level()
             self.next = self.pscene
 
+    def render(self, screen):
+        # keep rendering the play scene
+        self.pscene.render(screen)
+
+        if (self.tpassed > 0.1):
+            screen.blit(self.complete_txt, (150, 200))
+            if not self.played_complete_sound:
+                self.juke.play_sfx('complete')
+                self.played_complete_sound = True
+        if self.high and self.tpassed > 1:
+            if not self.played_high_sound:
+                self.juke.play_sfx('highscore')
+                self.played_high_sound = True
+            screen.blit(self.high_txt, (150, 250))
+
+_FILL_COL = (239, 212, 122)
 
 def _get_title_surfaces(txt, border=10, off=10):
     """Return surface when not selected and when selected."""
     
-    tsurf = rstore.fonts['title'].render(txt, True, BLACK)
+    tsurf = rstore.fonts['menu'].render(txt, True, BLACK)
     tsize = tsurf.get_size()
 
     # create two larger surfaces for border and offset
@@ -267,11 +337,11 @@ def _get_title_surfaces(txt, border=10, off=10):
     not_selected_surf = pygame.Surface((tsize[0] + extra, tsize[1] + extra))
     selected_surf = pygame.Surface((tsize[0] + extra, tsize[1] + extra))
 
-    not_selected_surf.fill(WHITE)
+    not_selected_surf.fill(_FILL_COL)
 
-    selected_surf.fill(YELLOW)
+    selected_surf.fill(BLACK)
     selected_surf_mid = pygame.Surface((tsize[0] + 2 * off, tsize[1] + 2 * off))
-    selected_surf_mid.fill(WHITE)
+    selected_surf_mid.fill(_FILL_COL)
     selected_surf.blit(selected_surf_mid, (border, border))
 
     not_selected_surf.blit(tsurf, (off + border, off + border))
@@ -302,8 +372,21 @@ class TextClickingScene(Scene):
             new_rect.x += pos[0]
             new_rect.y += pos[1]
             self.rects[opt] = new_rect
+
+        # have we clicked to switch the scene?
+        self.switch = False
+        self.new_scene = None
+        # time waited so far since clicking
+        self.dtswitch = 0
+        # time to wait between clicking and switching to the scene
+        self.wait_time = 0
     
     def process_input(self, events, dt):
+        if self.switch:
+            # we are in the process of scene switching, just waiting
+            # for the timeout
+            return
+
         pos = pygame.mouse.get_pos()
         for opt, r in self.rects.items():
             if r.collidepoint(pos):
@@ -316,9 +399,25 @@ class TextClickingScene(Scene):
                 # did we click one of the options?
                 for opt, r in self.rects.items():
                     if r.collidepoint(pos):
+                        # we clicked on a button
+                        self._game.juke.play_sfx('menuclick')
                         newscene_name = self.options[opt][3]
-                        newscene = get_scene(newscene_name)(self._game)
-                        self.next = newscene#self.options[opt][3](self._game)
+                        try:
+                            # time to pause before switching screen
+                            self.wait_time = self.options[opt][4]
+                        except:
+                            self.wait_time = 0
+                        self.new_scene = get_scene(newscene_name)
+                        self.switch = True
+                        self.dtswitch = 0
+
+    def update(self, dt):
+        if self.switch:
+            self.dtswitch += dt
+            if (self.dtswitch > self.wait_time):
+                # create the new scene object
+                newscene = self.new_scene(self._game)
+                self.next = newscene
 
     def render(self, screen):
         # blit background
@@ -335,7 +434,7 @@ class TextClickingScene(Scene):
                 screen.blit(surfs[0], pos)
 
 # data for the back button in all screens
-_back_data = ['Back', (100, 200), False, 'title']
+_back_data = ['Back', (220, 400), False, 'title']
     
 class OptionsScene(TextClickingScene):
     options = {'sound': ['Sound on', (100, 100), False, 'play'],
@@ -347,15 +446,25 @@ class OptionsScene(TextClickingScene):
 
 
 class TitleScene(TextClickingScene):
-    options = {'new': ['New Game', (100, 100), False, 'play'],
-               'options': ['Options', (100, 200), False, 'options'],
-               'high': ['High Scores', (100, 300), False, 'high'],
-               'quit': ['Quit', (100, 400), False, 'quit']}
+    # name of button, position, whether it is selected, scene name it
+    # leads to, how long to pause for before changing scene.
+    options = {'new': ['New Game', (220, 150), False, 'play', 0.8],
+               'options': ['Options', (220, 250), False, 'options'],
+               'high': ['High Scores', (220, 350), False, 'high'],
+               'quit': ['Quit', (220, 450), False, 'quit']}
 
     def __init__(self, game):
         self._game = game
+        self._title_text = rstore.fonts['title'].render('SAVE ALL       BITS', True, BLACK)
+        self._title_pos = (150, 50)
+        cell_im = cell.PlayerCellSprite([0, 0], **{'health': 8}).image
+        self._cell_im = cell_im
         super(TitleScene, self).__init__(self._game, self.options)
 
+    def render(self, screen):
+        super(TitleScene, self).render(screen)
+        screen.blit(self._title_text, self._title_pos)
+        screen.blit(self._cell_im, (390, 65))
 
 class HighScoreScene(TextClickingScene):
     options = {'back': _back_data}
@@ -364,10 +473,39 @@ class HighScoreScene(TextClickingScene):
         self._game = game
         super(HighScoreScene, self).__init__(self._game, self.options)
 
+        self.title_text = rstore.fonts['menu'].render('High Scores', True, BLACK)
+        self.head_text = rstore.fonts['highscore'].render('Level Saved Moves', True, BLACK)
+
+        self._score_text = []
+        self.set_score_text()
+
+    def set_score_text(self):
+        scs = score.scores
+        levs = scs.keys()
+        levs.sort()
+        for lev in levs:
+            nsaved, nmoved = score.scores[lev]
+            nmovedstr = score.get_score_string(nmoved)
+            if nsaved == score.NO_SCORE:
+                nsavedstr = ' - '
+            else:
+                nsavedstr = str(nsaved) + '/8'
+            txt = rstore.fonts['highscore'].render('{0}    {1}    {2}'.format(lev, nsavedstr, nmovedstr), True, BLACK)
+            self._score_text.append(txt)
+
+    def render(self, screen):
+        super(HighScoreScene, self).render(screen)
+
+        screen.blit(self.title_text, (220, 80))
+        screen.blit(self.head_text, (220, 140))
+
+        for (i, line) in enumerate(self._score_text):
+            screen.blit(line, (245, 180 + i*25))
+
+
 class QuitScene(Scene):
     def __init__(self, game):
         self.next = None
-
 
 SCENE_MAP = {'title': TitleScene,
              'options': OptionsScene,

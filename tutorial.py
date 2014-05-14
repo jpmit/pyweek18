@@ -8,6 +8,7 @@ import util
 _TUTSTEPS = {0: [
     # can split the the text over as many lines as we want, it will be
     # formatted
+    ["Let me show you how to play.", []],
     ["Click on the flashing bit.",
      [[1, 4]]],
     ["The white cells are possible moves for this bit.",
@@ -24,7 +25,7 @@ _TUTSTEPS = {0: [
     ["Now try clicking the bit out there on its own.",
      [[6, 4]]],
     ["There are no white cells, "
-     "since no moves are possible.",[]],
+     "since no moves are possible for this bit.",[]],
      ["The aim is to get all 8 bits to the goal cells.", []],
      ["That's the blue cells at the top.", []],
      ["Click on the bit nearest the goal cells.", [[2, 1]]],
@@ -33,22 +34,28 @@ _TUTSTEPS = {0: [
      ["Move the top bit to one of the goal cells.", [[1, 0], [2, 0], [3, 0]]],
     ["Nice!  You just saved a bit.", []],
     ["Now for the other 7...", []],
-    ["By the way, those black cells are obstacles you can't move into.", []]
+    ["By the way, those black cells are obstacles you can't move into.", []],
+    ["Try to save all 8 bits in each level, in as few moves as possible.", []],
+    ["Your best score for the current level is shown on the right.", []],
+    ["You can switch levels by clicking the arrow buttons.", []],
+    ["And you can restart the current level at any point by clicking on the R button.", []],
+    ["Good luck!", []]
 ],
              1: [
                  ["Some of the 8 bits can be stronger than others.", []],
                  ["Try moving the top bit up towards the goal cells.", [[3, 2]]],
                  ["Move up towards the goal cells.", [[4, 1]]],
                  ["Aha! Those gun cells are out to get you.", []],
+                 ["They will shoot whenever a bit is in their line of sight.", []],
                  ["When the value on the bit gets to zero, the bit is lost.", []],
                  ["You can use the stronger bits to shield the weaker bits.", []],
-                 ["For example, try moving the weaker bit in behind the stronger bit.", [[4, 2]]]
+                 ["For example, you might try moving a weaker bit in behind the stronger bit...", []]
 ]
 }
 
 
 # this makes a different since we are using alpha transparency
-_FILL_COL = (224, 224, 224)
+_FILL_COL = (239, 212, 122)
 
 tsurf = pygame.Surface(TUT_SIZE)
 
@@ -165,8 +172,3 @@ class Tutorial(object):
             if self.step.finished:
                 self.changed = True
                 self.advance()
-
-
-
-def get_tutorial(playscene):
-    return Tutorial(playscene)

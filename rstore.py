@@ -19,17 +19,24 @@ images = {'bg': 'paper.png',
 
 # value is name, size in pts
 fonts = {'main': ('ShareTechMono-Regular.ttf', 30),
-         'hudlarge': ('ShareTechMono-Regular.ttf', 40),
-         'hudsmall': ('ShareTechMono-Regular.ttf', 20),
-         'tutorial': ('ShareTechMono-Regular.ttf', 20),
-         'title': ('PGott.ttf', 50)
+         'hudlarge': ('PGott.ttf', 40),
+         'highscore': ('PGott.ttf', 30),
+         'hudsmall': ('PGott.ttf', 20),
+         'tutorial': ('PGott.ttf', 20),
+         'menu': ('PGott.ttf', 40),
+         'finish': ('PGott.ttf', 40),
+         'title': ('SerialPublicationDEMO.ttf', 80)
 }
 
 sfx = {'click': 'click.ogg',
+       'menuclick': 'menuclick.ogg',
        'shoot': 'shoot.ogg',
        'goal': 'goal.ogg',
        'error': 'error.ogg',
-       'turn': 'turn.ogg'}
+       'turn': 'turn.ogg',
+       'complete': 'complete2.ogg',
+       'highscore': 'highscore.ogg',
+       'stranded': 'stranded.ogg'}
 
 music = {'reawakening': 'reawakening.ogg'}
 
