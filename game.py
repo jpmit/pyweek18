@@ -1,10 +1,9 @@
 import pygame
 import pygame.locals as pl
 
-import time
 import rstore
 import score
-from scene import PlayScene, TitleScene, OptionsScene
+from scene import TitleScene, OptionsScene
 import tutorial
 import const
 
@@ -24,7 +23,7 @@ class JukeBox(object):
             self.soundon = False
         else:
             self.soundon = True
-        
+
         # mapping of file names to sound effects and music
         self.sfx = rstore.sfx
         self.music = rstore.music
@@ -34,7 +33,7 @@ class JukeBox(object):
         # we let the user configure these
         self._sfxon = True
         self._musicon = True
-    
+
     def play_music(self, name):
         if self.soundon and self._musicon:
             pygame.mixer.music.load(self.music[name])
@@ -71,7 +70,7 @@ class JukeBox(object):
 
     def is_music_on(self):
         return self._musicon
-        
+
 
 class Game(object):
     def __init__(self):
