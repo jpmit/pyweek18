@@ -5,18 +5,16 @@ import time
 import rstore
 import score
 from scene import PlayScene, TitleScene, OptionsScene
-import globalobj
 import tutorial
 import const
-
 
 class JukeBox(object):
     """Game jukebox that handles music and sfx.
 
     We have three attributes that are important:
     soundon - this will be true unless we couldn't initialize pygame music
-    musicon - this can be set by the user
-    sfxon   - this can be set by the user
+    musicon - this can be set by the user via the menu
+    sfxon   - this can be set by the user via the menu
     """
 
     def __init__(self):
@@ -152,9 +150,6 @@ class Game(object):
                 ascene = None
                 pygame.quit()
 
-if __name__ == "__main__":
+def main():
     gm = Game()
-    def get_game():
-        return gm
-    globalobj.get_game = get_game
     gm.mainloop()

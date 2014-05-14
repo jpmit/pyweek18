@@ -2,7 +2,6 @@ import pygame
 import pygame.locals as pl
 
 from const import *
-import globalobj
 import cell
 
 # this makes a different since we are using alpha transparency
