@@ -72,7 +72,7 @@ class Game(object):
     def mainloop(self):
         
         # first scene of the game
-        ascene = PlayScene(self)
+        ascene = TitleScene(self)
 
         # initialize clock
         dt = self.clock.tick(const.FPS) / 1000.0
@@ -109,7 +109,6 @@ class Game(object):
             if quitevent:
                 ascene = None
                 pygame.quit()
-
 
 if __name__ == "__main__":
     gm = Game()

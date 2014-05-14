@@ -14,18 +14,22 @@ images = {'bg': 'paper.png',
           'arrowleft': 'arrowleft.png',
           'arrowdown': 'arrowdown.png',
           'arrowright': 'arrowright.png',
-          'arrowup': 'arrowup.png'}
+          'arrowup': 'arrowup.png',
+          'hud' : 'hud.png'}
 
 # value is name, size in pts
 fonts = {'main': ('ShareTechMono-Regular.ttf', 30),
          'hudlarge': ('ShareTechMono-Regular.ttf', 40),
          'hudsmall': ('ShareTechMono-Regular.ttf', 20),
-         'tutorial': ('ShareTechMono-Regular.ttf', 20)}
+         'tutorial': ('ShareTechMono-Regular.ttf', 20),
+         'title': ('PGott.ttf', 50)
+}
 
 sfx = {'click': 'click.ogg',
        'shoot': 'shoot.ogg',
        'goal': 'goal.ogg',
-       'error': 'error.ogg'}
+       'error': 'error.ogg',
+       'turn': 'turn.ogg'}
 
 music = {'reawakening': 'reawakening.ogg'}
 

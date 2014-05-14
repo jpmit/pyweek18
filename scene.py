@@ -9,26 +9,7 @@ import hud
 import cell
 import rstore
 import tutorial
-
-class Scene(object):
-    """Abstract base class."""
-
-    def __init__(self):
-        # the next property is accessed every iteration of the main
-        # loop, to get the scene.  When we want to change to a new
-        # scene, we simply set self.next = LevelCompleteScene() (for
-        # example).  This should be done in the update() method below.
-        self.next = self
-
-    def process_input(self, events, dt):
-        pass
-
-    def update(self, dt):
-        pass
-
-    def render(self, screen):
-        pass
-
+from basescene import Scene
 
 def _get_level(fname):
     """Return full path to level file."""
@@ -100,8 +81,8 @@ class PlayScene(Scene):
         pass
 
     def mouseup_tutorial(self, pos):
-        self._tutorial.try_advance()
-        pass
+        if self._tutorial.try_advance():
+            self.game.juke.play_sfx('turn')
 
     def mouseover_board(self, pos):
         pass
@@ -274,12 +255,125 @@ class LevelCompleteScene(Scene):
             self.pscene.load_level()
             self.next = self.pscene
 
-class TitleScene(Scene):
-    def __init__(self, game):
-        super(TitleScene, self).__init__()
+
+def _get_title_surfaces(txt, border=10, off=10):
+    """Return surface when not selected and when selected."""
+    
+    tsurf = rstore.fonts['title'].render(txt, True, BLACK)
+    tsize = tsurf.get_size()
+
+    # create two larger surfaces for border and offset
+    extra = 2 * (border + off)
+    not_selected_surf = pygame.Surface((tsize[0] + extra, tsize[1] + extra))
+    selected_surf = pygame.Surface((tsize[0] + extra, tsize[1] + extra))
+
+    not_selected_surf.fill(WHITE)
+
+    selected_surf.fill(YELLOW)
+    selected_surf_mid = pygame.Surface((tsize[0] + 2 * off, tsize[1] + 2 * off))
+    selected_surf_mid.fill(WHITE)
+    selected_surf.blit(selected_surf_mid, (border, border))
+
+    not_selected_surf.blit(tsurf, (off + border, off + border))
+    selected_surf.blit(tsurf, (off + border, off + border))
+
+    return not_selected_surf, selected_surf
+
+class TextClickingScene(Scene):
+    """Base class for screens with clickable text."""
+    def __init__(self, game, options):
+        super(TextClickingScene, self).__init__()
         self._game = game
+        self.options = options
+
+        # the actual surfaces
+        self.surfaces = {}
+        # rects for checking mouse hover
+        self.rects = {}
+        for opt in self.options:
+            name = self.options[opt][0]
+            pos = self.options[opt][1]
+            not_selected_surf, selected_surf = _get_title_surfaces(name)
+            # rect for mouse hover
+            self.surfaces[opt] = [not_selected_surf, selected_surf]
+            # apply the position offset to the rect for easy
+            # comparison with mouse position.
+            new_rect = not_selected_surf.get_rect()
+            new_rect.x += pos[0]
+            new_rect.y += pos[1]
+            self.rects[opt] = new_rect
     
     def process_input(self, events, dt):
+        pos = pygame.mouse.get_pos()
+        for opt, r in self.rects.items():
+            if r.collidepoint(pos):
+                self.options[opt][2] = True
+            else:
+                self.options[opt][2] = False
+
         for e in events:
             if (e.type == pl.MOUSEBUTTONUP):
-                self.next = PlayScene(self._game)
+                # did we click one of the options?
+                for opt, r in self.rects.items():
+                    if r.collidepoint(pos):
+                        newscene_name = self.options[opt][3]
+                        newscene = get_scene(newscene_name)(self._game)
+                        self.next = newscene#self.options[opt][3](self._game)
+
+    def render(self, screen):
+        # blit background
+        screen.blit(rstore.images['bg'], (0, 0))
+
+        for opt, val in self.options.items():
+            surfs = self.surfaces[opt]
+            pos = val[1]
+            selected = val[2]
+            if (selected):
+                # not selected
+                screen.blit(surfs[1], pos)                
+            else:
+                screen.blit(surfs[0], pos)
+
+# data for the back button in all screens
+_back_data = ['Back', (100, 200), False, 'title']
+    
+class OptionsScene(TextClickingScene):
+    options = {'sound': ['Sound on', (100, 100), False, 'play'],
+               'back': _back_data}
+
+    def __init__(self, game):
+        self._game = game
+        super(OptionsScene, self).__init__(self._game, self.options)
+
+
+class TitleScene(TextClickingScene):
+    options = {'new': ['New Game', (100, 100), False, 'play'],
+               'options': ['Options', (100, 200), False, 'options'],
+               'high': ['High Scores', (100, 300), False, 'high'],
+               'quit': ['Quit', (100, 400), False, 'quit']}
+
+    def __init__(self, game):
+        self._game = game
+        super(TitleScene, self).__init__(self._game, self.options)
+
+
+class HighScoreScene(TextClickingScene):
+    options = {'back': _back_data}
+
+    def __init__(self, game):
+        self._game = game
+        super(HighScoreScene, self).__init__(self._game, self.options)
+
+class QuitScene(Scene):
+    def __init__(self, game):
+        self.next = None
+
+
+SCENE_MAP = {'title': TitleScene,
+             'options': OptionsScene,
+             'play': PlayScene,
+             'high': HighScoreScene,
+             'quit': QuitScene}
+             
+def get_scene(name):
+    return SCENE_MAP[name]

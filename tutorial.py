@@ -32,7 +32,8 @@ _TUTSTEPS = {0: [
       " you won't have any neighbours.", []],
      ["Move the top bit to one of the goal cells.", [[1, 0], [2, 0], [3, 0]]],
     ["Nice!  You just saved a bit.", []],
-    ["Now for the other 7...", []]
+    ["Now for the other 7...", []],
+    ["By the way, those black cells are obstacles you can't move into.", []]
 ],
              1: [
                  ["Some of the 8 bits can be stronger than others.", []],
@@ -141,6 +142,8 @@ class Tutorial(object):
         """
         if not self.step.toclick:
             self.step.finished = True
+            return True
+        return False
 
     def get_allowed_cells(self):
         """Return list of cells we are waiting for user to click on."""

@@ -1,4 +1,5 @@
 import pygame
+import pygame.locals as pl
 import rstore
 
 from const import *
@@ -7,8 +8,8 @@ from const import *
 _FILL_COL = (224, 224, 224)
 
 # transparent surface to blit to
-hsurf = pygame.Surface(HUD_SIZE)
-hsurf.set_colorkey(_FILL_COL)
+hsurf = pygame.Surface(HUD_SIZE, pl.SRCALPHA, 32)
+#hsurf.set_colorkey(_FILL_COL)
 
 def pos_on_hud(pos):
     return (pos[0] > HUD_POS[0] and pos[0] < HUD_POS[0] + HUD_SIZE[0] 
@@ -34,7 +35,8 @@ class Hud(object):
         self.set_lost(0)
 
     def draw(self):
-        hsurf.fill(_FILL_COL)
+        #hsurf.fill(_FILL_COL)
+        hsurf.blit(rstore.images['hud'], (0, 0))
         hsurf.blit(self.levtxt, (0, 0))
         hsurf.blit(self.movtxt, (0, 100))
         hsurf.blit(self.savetxt, (0, 200))
