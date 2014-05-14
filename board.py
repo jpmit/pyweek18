@@ -196,6 +196,14 @@ class GameBoard(object):
             return self._cells[k]
         return None
 
+    def get_cell_or_move_cell(self, pos):
+        k = '{0}-{1}'.format(pos[0], pos[1])
+        if k in self._cells:
+            return self._cells[k]
+        elif k in self._move_cells:
+            return self._move_cells[k]
+        return None
+
     def is_ctype(self, pos, ctype):
         c = self.get_cell(pos)
         if c and (c.ctype == ctype):

@@ -88,6 +88,8 @@ class PlayerCellSprite(CellSprite):
         self.set_image()
 
     def set_flash(self, fl):
+        if self.flashing == fl:
+            return
         self.tstate = 0
         self.on = True
         self.flashing = fl 
@@ -129,6 +131,13 @@ class PlayerMoveCellSprite(CellSprite):
         self.tstate = 0
         self.on = True
         self.set_image()
+
+    def set_flash(self, fl):
+        if self.flashing == fl:
+            return
+        self.tstate = 0
+        self.on = True
+        self.flashing = fl 
 
     def set_image(self):
         if self.on:

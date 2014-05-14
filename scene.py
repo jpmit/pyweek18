@@ -169,6 +169,22 @@ class PlayScene(Scene):
         
     def finish_opponent_move(self):
         pass
+
+    def handle_tutorial_cells(self):
+        """Make the right bits flash for this stage of the tutorial."""
+        # set any currently flashing bits to not flash
+        for cpos in self._tutflash:
+            c = self._board.get_cell(cpos)
+            if c is not None:
+                c.set_flash(False)
+        self._tutflash = []
+        # check if there are any new bits to flash
+        allowed_pos = self._tutorial.get_allowed_cells()
+        for cpos in allowed_pos:
+            #if self._board.is_player_cell(cpos):
+            self._tutflash.append(cpos)
+            c = self._board.get_cell_or_move_cell(cpos)
+            c.set_flash(True)
         
     def update(self, dt):
 
@@ -184,18 +200,7 @@ class PlayScene(Scene):
 
         # update tutorial
         if self._tutorial.changed:
-            # set any currently flashing bits to not flash
-            for cpos in self._tutflash:
-                c = self._board.get_cell(cpos)
-                c.set_flash(False)
-            self._tutflash = []
-            # check if there are any new bits to flash
-            allowed_pos = self._tutorial.get_allowed_cells()
-            for cpos in allowed_pos:
-                if self._board.is_player_cell(cpos):
-                    self._tutflash.append(cpos)
-                    c = self._board.get_cell(cpos)
-                    c.set_flash(True)
+            self.handle_tutorial_cells()
         self._tutorial.update(dt)
     
     def update_player(self, dt):

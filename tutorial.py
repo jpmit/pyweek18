@@ -9,23 +9,39 @@ _TUTSTEPS = {0: [
     # can split the the text over as many lines as we want, it will be
     # formatted
     ["Click on the flashing bit.",
-     [[1, 4]], 0],
+     [[1, 4]]],
     ["The white cells are possible moves for this bit.",
-     [], 5],
+     []],
     ["Each bit can move into one of its 8 neighbouring cells.",
-     [], 5],
+     []],
     ["As long as that cell isn't occupied.",
-     [], 5],
+     []],
     ["And as long as the move will leave the bit " 
       "with at least one neighbour on either the vertical or horizontal.",
-     [], 5],
+     []],
     ["Click on one of the white cells to move this bit.",
-     [[1, 3], [2, 3], [2, 5]], 0],
-    ["Try moving the bit that is on its own.",
-     [[6, 4]], 0],
+     [[1, 3], [2, 3], [2, 5]]],
+    ["Now try clicking the bit out there on its own.",
+     [[6, 4]]],
     ["There are no white cells, "
-     "indicating no moves are possible.",
-     [], 2]
+     "since no moves are possible.",[]],
+     ["The aim is to get all 8 bits to the goal cells.", []],
+     ["That's the blue cells at the top.", []],
+     ["Click on the bit nearest the goal cells.", [[2, 1]]],
+     ["You can always move to a goal cell, even if it means "
+      " you won't have any neighbours.", []],
+     ["Move the top bit to one of the goal cells.", [[1, 0], [2, 0], [3, 0]]],
+    ["Nice!  You just saved a bit.", []],
+    ["Now for the other 7...", []]
+],
+             1: [
+                 ["Some of the 8 bits can be stronger than others.", []],
+                 ["Try moving the top bit up towards the goal cells.", [[3, 2]]],
+                 ["Move up towards the goal cells.", [[4, 1]]],
+                 ["Aha! Those gun cells are out to get you.", []],
+                 ["When the value on the bit gets to zero, the bit is lost.", []],
+                 ["You can use the stronger bits to shield the weaker bits.", []],
+                 ["For example, try moving the weaker bit in behind the stronger bit.", [[4, 2]]]
 ]
 }
 
@@ -70,25 +86,18 @@ def draw_tutorial(tut):
 
 class Step(object):
     """A single step of the tutorial."""
-    def __init__(self, text, toclick, ttot):
+    def __init__(self, text, toclick):
         self.text = text
         # we won't advance to the next step until one of the cells in
         # toclick list has been clicked.
         self.toclick = toclick
-        # if we aren't waiting for a user click, we finish after a set
-        # time.
-        self.timeout = (ttot > 0)
-        self.tleft = ttot
         self.finished = False
+
+        if not self.toclick:
+            self.text += ' [click]'
 
     def update(self, dt):
         return
-#        if not self.timeout:
-#            return
-#
-#        self.tleft -= dt
-#        if (self.tleft <= 0):
-#            self.finished = True
 
 class Tutorial(object):
     def __init__(self, playscene):
@@ -104,7 +113,7 @@ class Tutorial(object):
     def load_steps(self, levelnum):
         stepdata = _TUTSTEPS.get(levelnum, [])
         for s in stepdata:
-            self._steps.append(Step(text=s[0], toclick=s[1], ttot=s[2]))
+            self._steps.append(Step(text=s[0], toclick=s[1]))
         if self._steps:
             self.step = self._steps[0]
         else:
