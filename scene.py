@@ -29,7 +29,7 @@ class PlayScene(Scene):
         self._board = board.GameBoard()
         self._hud = hud.Hud(self._board)
 
-        self.levnum = 2
+        self.levnum = 0
         self.load_level()
 
     def load_level(self):
@@ -47,7 +47,10 @@ class PlayScene(Scene):
         # cell positions of any bits the tutorial wants to flash
         self._tutflash = []
         # load the relevant tutorial
-        self._tutorial = tutorial.Tutorial(self)
+        if tutorial.is_active:
+            self._tutorial = tutorial.Tutorial(self)
+        else:
+            self._tutorial = tutorial.DummyTutorial()
         # play sound for the start of the tutorial
         if self._tutorial.step is not None:
             self.game.juke.play_sfx('turn')
@@ -190,7 +193,7 @@ class PlayScene(Scene):
         if not self._board.can_move():
             score = (self._board.nsaved, self._board.nmoves)
             # level 'complete', change scene
-            if (self._board.nsaved != 8):
+            if (self._board.nsaved + self._board.nlost != 8):
                 self.next = StrandedScene(self, score)
             else:
                 self.next = LevelCompleteScene(self, score)
@@ -242,7 +245,6 @@ class PlayScene(Scene):
 
         # blit the tutorial surface to the screen
         screen.blit(tutorial.tsurf, TUT_POS)
-        pass
 
 class StrandedScene(Scene):
     # total time spent in this scene
@@ -435,14 +437,96 @@ class TextClickingScene(Scene):
 
 # data for the back button in all screens
 _back_data = ['Back', (220, 400), False, 'title']
+
+class ToggleButton(object):
+    def __init__(self, image_on, image_off, pos, on=True):
+        self.image_on = image_on
+        self.image_off = image_off
+        if on:
+            self.image = self.image_on
+        else:
+            self.image = self.image_off
+
+        self.rect = self.image.get_rect()
+        self.rect.x += pos[0]
+        self.rect.y += pos[1]
+
+    def toggle(self):
+        if (self.image == self.image_on):
+            self.image = self.image_off
+        else:
+            self.image = self.image_on
+
+    def set_hover(self, hover):
+        # can change image here if we are hovering
+        pass
     
 class OptionsScene(TextClickingScene):
-    options = {'sound': ['Sound on', (100, 100), False, 'play'],
-               'back': _back_data}
-
+    options = {'back': _back_data}
+    ON_COL = (55, 117, 61)
+    OFF_COL = (166, 0, 0)
+    SIZE = 60
+    OPTION_TUTORIAL = 'tutorial'
+    OPTION_MUSIC = 'music'
+    OPTION_SFX = 'sfx'
+    button_data = [(OPTION_TUTORIAL, (340, 130)), (OPTION_MUSIC, (340, 210)), 
+                   (OPTION_SFX, (340, 290))]
     def __init__(self, game):
+
+        super(OptionsScene, self).__init__(game, self.options)
         self._game = game
-        super(OptionsScene, self).__init__(self._game, self.options)
+
+        self._tut_text = rstore.fonts['highscore'].render('Tutorial', True, BLACK)
+        self._music_text = rstore.fonts['highscore'].render('Music', True, BLACK)
+        self._sfx_text = rstore.fonts['highscore'].render('SFX', True, BLACK)
+
+        self._buttons = {}
+        # create ToggleButtons
+        self.create_buttons()
+
+    def create_buttons(self):
+        on_text = rstore.fonts['highscore'].render('on', True, BLACK)
+        off_text = rstore.fonts['highscore'].render('off', True, BLACK)
+        for bname, bpos in self.button_data:
+            on_surf = pygame.Surface((self.SIZE, self.SIZE))
+            on_surf.fill(self.ON_COL)
+            on_surf.blit(on_text, (10, 10))
+            off_surf = pygame.Surface((self.SIZE, self.SIZE))
+            off_surf.fill(self.OFF_COL)
+            off_surf.blit(off_text, (10, 10))
+            self._buttons[bname] = ToggleButton(on_surf, off_surf, bpos)
+
+    def process_input(self, events, dt):
+        super(OptionsScene, self).process_input(events, dt)
+
+        # check if any buttons clicked and toggle their image if so
+        for ev in events:
+            if (ev.type == pl.MOUSEBUTTONUP):
+                for butname, but in self._buttons.items():
+                    if but.rect.collidepoint(ev.pos):
+                        self._game.juke.play_sfx('menuclick')                        
+                        but.toggle()
+                        # change the option i.e. switch off the sound
+                        # etc.
+                        self._game.toggle_option(butname)
+
+        # hovering
+        pos = pygame.mouse.get_pos()
+        for butname, but in self._buttons.items():
+            if but.rect.collidepoint(pos):
+                but.set_hover(True)
+            else:
+                but.set_hover(False)
+    
+    def render(self, screen):
+        super(OptionsScene, self).render(screen)
+
+        screen.blit(self._tut_text, (220, 140))
+        screen.blit(self._music_text, (220, 220))
+        screen.blit(self._sfx_text, (220, 300))
+
+        for but in self._buttons.values():
+            screen.blit(but.image, but.rect)
 
 
 class TitleScene(TextClickingScene):

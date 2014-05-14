@@ -4,20 +4,21 @@ import pygame.locals as pl
 import time
 import rstore
 import score
-from scene import PlayScene, TitleScene
+from scene import PlayScene, TitleScene, OptionsScene
 import globalobj
+import tutorial
 import const
 
-def withsound(fn):
-    """Decorator for a class method."""
-    def wrapped(self, *args, **kwargs):
-        if self.soundon:
-            fn(self, *args, **kwargs)
-        return None
-    return wrapped
 
 class JukeBox(object):
-    """Game jukebox that handles music and sfx."""
+    """Game jukebox that handles music and sfx.
+
+    We have three attributes that are important:
+    soundon - this will be true unless we couldn't initialize pygame music
+    musicon - this can be set by the user
+    sfxon   - this can be set by the user
+    """
+
     def __init__(self):
         try:
             pygame.mixer.init()
@@ -31,29 +32,48 @@ class JukeBox(object):
         self.music = rstore.music
 
         self.playing = None
-    
-    @withsound
-    def play_music(self, name):
-        pygame.mixer.music.load(self.music[name])
-        # -1 means repeat
-        pygame.mixer.music.play(-1)
-        self.playing = name
 
-    @withsound
+        # we let the user configure these
+        self._sfxon = True
+        self._musicon = True
+    
+    def play_music(self, name):
+        if self.soundon and self._musicon:
+            pygame.mixer.music.load(self.music[name])
+            # -1 means repeat
+            pygame.mixer.music.play(-1)
+            self.playing = name
+
     def play_music_if(self, name):
         """Play music if not already playing."""
 
         if self.playing != name:
             self.play_music(name)
     
-    @withsound
     def stop_music(self):
         pygame.mixer.music.stop()
     
-    @withsound
     def play_sfx(self, name):
-        self.sfx[name].play()
+        if self.soundon and self._sfxon:
+            self.sfx[name].play()
 
+    def toggle_sfx(self):
+        self._sfxon = not self._sfxon
+    
+    def toggle_music(self):
+        if self._musicon:
+            self.stop_music()
+            self._musicon = False
+        else:
+            self._musicon = True
+            self.play_music(self.playing)
+
+    def is_sfx_on(self):
+        return self._sfxon
+
+    def is_music_on(self):
+        return self._musicon
+        
 
 class Game(object):
     def __init__(self):
@@ -74,6 +94,22 @@ class Game(object):
         self.juke.play_music('reawakening')
 
         pygame.mouse.set_cursor(*pygame.cursors.tri_left)
+
+    def toggle_option(self, option_name):
+        """Change option (tutorial, music, sfx)""" 
+        if (option_name == OptionsScene.OPTION_TUTORIAL):
+            tutorial.is_active = not tutorial.is_active
+        elif (option_name == OptionsScene.OPTION_MUSIC):
+            self.juke.toggle_music()
+        elif (option_name == OptionsScene.OPTION_SFX):
+            self.juke.toggle_sfx()
+
+    def get_options(self):
+        """Return current state of options available for options menu screen."""
+        return {OptionsScene.OPTION_TUTORIAL: tutorial.isactive,
+                OptionsScene.OPTION_MUSIC: self.juke.is_music_on(),
+                OptionsScene.OPTION_SFX: self.juke.is_sfx_on()}
+        
 
     def mainloop(self):
         

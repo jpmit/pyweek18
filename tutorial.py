@@ -37,8 +37,8 @@ _TUTSTEPS = {0: [
     ["By the way, those black cells are obstacles you can't move into.", []],
     ["Try to save all 8 bits in each level, in as few moves as possible.", []],
     ["Your best score for the current level is shown on the right.", []],
-    ["You can switch levels by clicking the arrow buttons.", []],
-    ["And you can restart the current level at any point by clicking on the R button.", []],
+    ["You can switch levels by clicking the arrow buttons on the right.", []],
+    ["And you can restart the current level at any point by clicking on the R button in the middle.", []],
     ["Good luck!", []]
 ],
              1: [
@@ -53,6 +53,8 @@ _TUTSTEPS = {0: [
 ]
 }
 
+# is the tutorial active
+is_active = True
 
 # this makes a different since we are using alpha transparency
 _FILL_COL = (239, 212, 122)
@@ -107,9 +109,50 @@ class Step(object):
     def update(self, dt):
         return
 
-class Tutorial(object):
-    def __init__(self, playscene):
+class BaseTutorial(object):
+    def __init__(self):
+        pass
 
+    def load_steps(self, levnum):
+        pass
+
+    def is_finished(self):
+        pass
+
+    def is_allowed(self, cpos):
+        pass
+    
+    def try_advance(self):
+        pass
+
+    def get_allowed_cells(self):
+        pass
+
+    def advance(self):
+        pass
+
+    def update(self, dt):
+        pass
+
+    
+class DummyTutorial(BaseTutorial):
+    def __init__(self):
+        super(DummyTutorial, self).__init__()
+        self.step = None
+        self.changed = False
+
+    def is_allowed(self, cpos):
+        return True
+    
+    def is_finished(self):
+        return True
+
+    def get_allowed_cells(self):
+        return []
+
+class Tutorial(BaseTutorial):
+    def __init__(self, playscene):
+        super(Tutorial, self).__init__()
         self._steps = []
         # the actual logic of the tutorial is a series of steps
         self.load_steps(playscene.levnum)
