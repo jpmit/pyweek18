@@ -506,6 +506,8 @@ class OptionsScene(TextClickingScene):
     def create_buttons(self):
         on_text = rstore.fonts['highscore'].render('on', True, BLACK)
         off_text = rstore.fonts['highscore'].render('off', True, BLACK)
+        # get the state of the buttons!
+        bstate = self._game.get_options()
         for bname, bpos in self.button_data:
             on_surf = pygame.Surface((self.SIZE, self.SIZE))
             on_surf.fill(self.ON_COL)
@@ -513,7 +515,8 @@ class OptionsScene(TextClickingScene):
             off_surf = pygame.Surface((self.SIZE, self.SIZE))
             off_surf.fill(self.OFF_COL)
             off_surf.blit(off_text, (10, 10))
-            self._buttons[bname] = ToggleButton(on_surf, off_surf, bpos)
+            self._buttons[bname] = ToggleButton(on_surf, off_surf, bpos,
+                                                on=bstate[bname])
 
     def process_input(self, events, dt):
         super(OptionsScene, self).process_input(events, dt)

@@ -103,7 +103,7 @@ class Game(object):
 
     def get_options(self):
         """Return current state of options available for options menu screen."""
-        return {OptionsScene.OPTION_TUTORIAL: tutorial.isactive,
+        return {OptionsScene.OPTION_TUTORIAL: tutorial.is_active,
                 OptionsScene.OPTION_MUSIC: self.juke.is_music_on(),
                 OptionsScene.OPTION_SFX: self.juke.is_sfx_on()}
 
