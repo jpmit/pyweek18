@@ -78,7 +78,7 @@ class PlayScene(Scene):
                     self.levnum += 1
                     self.load_level()
             elif (hud_event == hud.EVENT_PREVIOUS):
-                if (self.levnum != 0):
+                if (self.levnum != 1):
                     self.levnum -= 1
                     self.load_level()
             elif (hud_event == hud.EVENT_RESET):

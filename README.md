@@ -35,9 +35,8 @@ when/if you start playing 'for real'.
 
 High scores are saved locally.
 
-There are 8 levels (0 to 7) and yes, it is possible to save all 8 bits
-in every level (don't ask me what the minimum number of moves is
-though).
+There are 8 levels, and it is possible to save all 8 bits in every
+level (don't ask me what the minimum number of moves is though).
 
 LICENSE:
 -------
