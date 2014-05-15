@@ -1,9 +1,9 @@
-FPS = 70
+FPS = 30
 
 SCREEN_SIZE = (800, 600)
 
-# some charcoaly colours 
-# for actual charcoal, see encycolorpedia.com/36454f
+# colors for the cells
+# Player cells
 PCOL = {
     1: '#c9bab0',
     2: '#435662',
@@ -12,30 +12,39 @@ PCOL = {
     5: '#701010',
     8: '#701010'
 }
-# color for moves
+# possible move cells
 MOVCOL = (255, 249, 183)
+# goal cells
 GCOL = (103, 159, 245)
-PINK = (255, 210, 236)
-GREEN = (0, 255, 0)
-YELLOW = (255, 255, 0)
+# obstacle cells
+OCOL = (255, 210, 236)
+# bullet cells
 BULLETCOL = (200, 100, 80)
+# color for border around player when selected
+SELCOL = (255, 255, 0)
 
-ORANGEY = (239, 212, 122)
+# some other colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
+# used in menus and around playscene
+ORANGEY = (239, 212, 122)
+
+# color used for text
 GREY1 = (68, 68, 68)
+# color of reset button and new high score
 RED1 = (166, 0, 0)
+# color of main menu button
 BLUE1 = (16, 30, 81)
 
 # board cell size in px
 CSIZE = 50
 # outline in px (note the grid is only actually 1 px)
 OUTLINE = 2
-# constants for positioning the board on the screen
+
+# topleft of board is at (XOFF, YOFF)
 XOFF = 80
 YOFF = 80
+
 # show the grid?
 SHOWGRID = True
 
@@ -48,4 +57,5 @@ TUT_OFFSET = 4
 TUT_LINE_PAD = 4
 TUT_POS = (80, 400)
 
-N_LEVELS = 2
+# total number of levels is MAX_LEVEL + 1
+MAX_LEVEL = 2

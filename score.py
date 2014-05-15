@@ -1,6 +1,6 @@
 """High scores."""
 
-from const import N_LEVELS
+from const import MAX_LEVEL
 
 _FNAME = 'highscores.txt'
 
@@ -9,7 +9,7 @@ _DEFAULT = {}
 # named constant for if the level hasn't been finished yet
 NO_SCORE = -1
 
-for i in range(N_LEVELS):
+for i in range(MAX_LEVEL):
     # nsaved, nmoves
     _DEFAULT[i] = (NO_SCORE, NO_SCORE)
 

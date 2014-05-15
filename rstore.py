@@ -1,4 +1,4 @@
-"""Resource store and loader."""
+"""Resource store and loader (sort of modelled on Skellington)."""
 
 import os
 import pygame
@@ -47,6 +47,7 @@ sfx = {'click': 'click.ogg',
 music = {'reawakening': 'reawakening.ogg'}
 
 def load_resources():
+    """This should be called immediately after Pygame is initialized."""
     global fonts, images, sfx, music
 
     for key, val in images.items():

@@ -17,6 +17,7 @@ brect = bsurf.get_rect()
 # size of board surface in pixels
 _bsize = bsurf.get_size()
 
+
 def pos_on_board(pos):
     # note top left of board is at position (XOFF, YOFF)
     return (pos[0] > XOFF and pos[0] < _bsize[0] + XOFF 
@@ -33,8 +34,8 @@ def resize_board_and_grid_surfaces(size):
     _gridsurf = pygame.Surface((size[0] * CSIZE + 1, size[1] * CSIZE + 1))
     _gridsurf.set_colorkey(_FILL_COL)
 
-def draw_board(board, bullets):
 
+def draw_board(board, bullets):
     """Draw the state of the board and any bullets to the board surface."""
     if SHOWGRID:
         bsurf.blit(_gridsurf, (0, 0))
@@ -64,8 +65,10 @@ def draw_grid(size):
     for j in range(size[1] + 1):
         pygame.draw.line(_gridsurf, GREY1, (0, j * CSIZE), (pxsize[0], j * CSIZE))
 
+
 def get_clicked_cell(pos):
     return [(pos[0] - XOFF) / CSIZE, (pos[1] - YOFF) / CSIZE]
+
 
 class GameBoard(object):
     """Stores the state and handles manipulation of this state only."""
@@ -243,7 +246,6 @@ class GameBoard(object):
         c = self.get_cell(cto)
         if c and not c.canmove:
             return False
-
         # otherwise check possible move is adjacent to another player cell
         x, y = cto
         for p in [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]:

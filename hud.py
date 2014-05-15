@@ -10,7 +10,6 @@ _FILL_COL = (224, 224, 224)
 
 # transparent surface to blit to
 hsurf = pygame.Surface(HUD_SIZE, pl.SRCALPHA, 32)
-#hsurf.set_colorkey(_FILL_COL)
 
 def pos_on_hud(pos):
     return (pos[0] > HUD_POS[0] and pos[0] < HUD_POS[0] + HUD_SIZE[0] 

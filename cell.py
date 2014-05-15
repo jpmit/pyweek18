@@ -16,6 +16,7 @@ D_LEFT = 'left'
 D_RIGHT = 'right'
 D_DOWN = 'down'
 
+
 class BulletSprite(object):
     _SPEED = 500
     def __init__(self, pos, direction):
@@ -51,6 +52,7 @@ class CellSprite(object):
     def update(self, dt):
         pass
 
+
 class GunCellSprite(CellSprite):
     def __init__(self, pos, **kwargs):
         super(GunCellSprite, self).__init__(pos)
@@ -59,18 +61,21 @@ class GunCellSprite(CellSprite):
         self.image = rstore.images['arrow' + self.direction]
         self.canmove = False
 
+
 class GoalCellSprite(CellSprite):
     def __init__(self, pos):
         super(GoalCellSprite, self).__init__(pos)
         self.ctype = C_GOAL
         self.image.fill(GCOL)
 
+
 class ObstacleCellSprite(CellSprite):
     def __init__(self, pos):
         super(ObstacleCellSprite, self).__init__(pos)
         self.ctype = C_OBSTACLE
-        self.image.fill(PINK)
+        self.image.fill(OCOL)
         self.canmove = False
+
 
 class PlayerCellSprite(CellSprite):
     # we only flash to help the tutorial
@@ -98,7 +103,7 @@ class PlayerCellSprite(CellSprite):
         # need different colors here for the different numbers!
 
         if self.selected:
-            self.image.fill(YELLOW)
+            self.image.fill(SELCOL)
             pygame.draw.rect(self.image, pygame.Color(PCOL[self.health]), 
                              (OUTLINE, OUTLINE, CSIZE - 4 * OUTLINE, CSIZE - 4 * OUTLINE))
             self.image.set_alpha(128)
@@ -118,6 +123,7 @@ class PlayerCellSprite(CellSprite):
                 self.tstate = 0
                 self.on = not self.on
         self.set_image()
+
 
 class PlayerMoveCellSprite(CellSprite):
     _FLASHTIME = 0.8

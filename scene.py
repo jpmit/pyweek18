@@ -29,7 +29,7 @@ class PlayScene(Scene):
         self._board = board.GameBoard()
         self._hud = hud.Hud(self, self._board)
 
-        self.levnum = 1
+        self.levnum = 0
         self.load_level()
 
     def load_level(self):
@@ -76,7 +76,7 @@ class PlayScene(Scene):
             hudpos = (pos[0] - HUD_POS[0], pos[1] - HUD_POS[1])
             hud_event = self._hud.handle_mouse_up(hudpos)
             if (hud_event == hud.EVENT_NEXT):
-                if (self.levnum != N_LEVELS):
+                if (self.levnum != MAX_LEVEL):
                     self.levnum += 1
                     self.load_level()
             elif (hud_event == hud.EVENT_PREVIOUS):
@@ -109,7 +109,6 @@ class PlayScene(Scene):
         pass
 
     def process_input(self, events, dt):
-
         # mouse position
         mpos = pygame.mouse.get_pos()
 
@@ -168,7 +167,7 @@ class PlayScene(Scene):
                 self._bullets.append(cell.BulletSprite(p, g.direction))
                 # we hit the player
                 self.game.juke.play_sfx('shoot')
-        
+
     def finish_opponent_move(self):
         pass
 
@@ -187,7 +186,7 @@ class PlayScene(Scene):
             self._tutflash.append(cpos)
             c = self._board.get_cell_or_move_cell(cpos)
             c.set_flash(True)
-        
+
     def update(self, dt):
 
         for c in self._board.get_cells():
@@ -204,7 +203,7 @@ class PlayScene(Scene):
         if self._tutorial.changed:
             self.handle_tutorial_cells()
         self._tutorial.update(dt)
-    
+
     def update_player(self, dt):
         if not self._board.can_move():
             score = (self._board.nsaved, self._board.nmoves)
@@ -314,7 +313,6 @@ class LevelCompleteScene(Scene):
         # todo: play something different if stranded
         self.juke = self.pscene.game.juke
 
-        
         self.complete_txt = rstore.fonts['finish'].render(txt, True, WHITE)
         self.high_txt = rstore.fonts['finish'].render('New high score!', True, RED1)
         self.pscene = pscene
@@ -342,7 +340,7 @@ class LevelCompleteScene(Scene):
                 self.played_high_sound = True
             screen.blit(self.high_txt, (150, 250))
 
-_FILL_COL = (239, 212, 122)
+_FILL_COL = ORANGEY
 
 def _get_title_surfaces(txt, border=10, off=10):
     """Return surface when not selected and when selected."""
@@ -476,7 +474,8 @@ class ToggleButton(object):
     def set_hover(self, hover):
         # can change image here if we are hovering
         pass
-    
+
+
 class OptionsScene(TextClickingScene):
     options = {'back': _back_data}
     ON_COL = (55, 117, 61)
@@ -565,6 +564,7 @@ class TitleScene(TextClickingScene):
         super(TitleScene, self).render(screen)
         screen.blit(self._title_text, self._title_pos)
         screen.blit(self._cell_im, (390, 65))
+
 
 class HighScoreScene(TextClickingScene):
     options = {'back': _back_data}
