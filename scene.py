@@ -32,7 +32,7 @@ class PlayScene(Scene):
         self.levnum = 0
         self.load_level()
 
-    def load_level(self):
+    def load_level(self, reset=False):
         # load the data onto the board
         fname = 'l{0}.txt'.format(self.levnum)
         self._board.setup_board(_get_level(fname))
@@ -47,7 +47,7 @@ class PlayScene(Scene):
         # cell positions of any bits the tutorial wants to flash
         self._tutflash = []
         # load the relevant tutorial
-        if tutorial.is_active:
+        if tutorial.is_active and not reset:
             self._tutorial = tutorial.Tutorial(self)
         else:
             self._tutorial = tutorial.DummyTutorial()
@@ -84,7 +84,8 @@ class PlayScene(Scene):
                     self.levnum -= 1
                     self.load_level()
             elif (hud_event == hud.EVENT_RESET):
-                self.load_level()
+                # don't restart the tutorial
+                self.load_level(reset=True)
             elif (hud_event == hud.EVENT_MAIN):
                 self.next = TitleScene(self.game)
 
