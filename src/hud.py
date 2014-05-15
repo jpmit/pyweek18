@@ -182,6 +182,8 @@ class Hud(object):
     def set_high_score(self, sc):
         s0 = score.get_score_string(sc[0])
         s1 = score.get_score_string(sc[1])
+        if (sc[0] != score.NO_SCORE):
+            s0 += '/8'
             
         self.best_saved_txt = self.smallfont.render('Bits saved: {0}'.format(s0),
                                               True, _HUDCOL)
