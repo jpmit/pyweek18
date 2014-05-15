@@ -42,14 +42,14 @@ _TUTSTEPS = {0: [
     ["Good luck!", []]
 ],
              1: [
-                 ["Some of the 8 bits can be stronger than others.", []],
-                 ["Try moving the top bit up towards the goal cells.", [[3, 2]]],
-                 ["Move up towards the goal cells.", [[4, 1]]],
-                 ["Aha! Those gun cells are out to get you.", []],
-                 ["They will shoot whenever a bit is in their line of sight.", []],
-                 ["When the value on the bit gets to zero, the bit is lost.", []],
-                 ["You can use the stronger bits to shield the weaker bits.", []],
-                 ["For example, you might try moving a weaker bit in behind the stronger bit...", []]
+    ["Some of the 8 bits can be stronger than others.", []],
+    ["Try moving the top bit up towards the goal cells.", [[3, 2]]],
+    ["Move up towards the goal cells.", [[4, 1]]],
+    ["Aha! Those gun cells are out to get you.", []],
+    ["They will shoot whenever a bit is in their line of sight.", []],
+    ["When the value on the bit gets to zero, the bit is lost.", []],
+    ["You can use the stronger bits to shield the weaker bits.", []],
+    ["For example, you might try moving a weaker bit in behind the stronger bit...", []]
 ]
 }
 
@@ -61,11 +61,13 @@ _FILL_COL = (239, 212, 122)
 
 tsurf = pygame.Surface(TUT_SIZE)
 
+
 def pos_on_tutorial(pos):
     # tsurf changes in size so we need current size
     tsize = tsurf.get_size()
     return (pos[0] > TUT_POS[0] and pos[0] < TUT_POS[0] + tsize[0]
             and pos[1] > TUT_POS[1] and pos[1] < TUT_POS[1] + tsize[1])
+
 
 def draw_tutorial(tut):
     # this is a bit of a mess currently...
@@ -94,6 +96,7 @@ def draw_tutorial(tut):
             mt = rstore.fonts['tutorial'].render(line, True, GREY1)
             tsurf.blit(mt, (0 + TUT_BORDER + TUT_OFFSET, TUT_BORDER + TUT_OFFSET + (TUT_LINE_PAD + char_height) * i))
 
+
 class Step(object):
     """A single step of the tutorial."""
     def __init__(self, text, toclick):
@@ -108,6 +111,7 @@ class Step(object):
 
     def update(self, dt):
         return
+
 
 class BaseTutorial(object):
     def __init__(self):
@@ -149,6 +153,7 @@ class DummyTutorial(BaseTutorial):
 
     def get_allowed_cells(self):
         return []
+
 
 class Tutorial(BaseTutorial):
     def __init__(self, playscene):
