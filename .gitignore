@@ -2,3 +2,5 @@
 tmp
 *.pyc
 highscores.txt
+create-upload.py
+*.zip

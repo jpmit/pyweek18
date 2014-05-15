@@ -1,4 +1,4 @@
 #! /usr/bin/env python
 
-import game
+from src import game
 game.main()
