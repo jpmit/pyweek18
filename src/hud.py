@@ -51,7 +51,7 @@ class Hud(object):
         self._board = board
         self.smallfont = rstore.fonts['hudsmall']
         self.largefont = rstore.fonts['hudlarge']
-        self.set_data(0)
+        self.set_data(1)
 
         self.currenttxt = self.smallfont.render('Current', True, RED1)
         self.besttxt = self.smallfont.render('Best', True, RED1)

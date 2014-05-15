@@ -26,7 +26,8 @@ class PlayScene(Scene):
         self._board = board.GameBoard()
         self._hud = hud.Hud(self, self._board)
 
-        self.levnum = 2
+        self.levnum = 1
+        #tutorial.is_active = False
         self.load_level()
 
     def load_level(self, reset=False):
@@ -73,7 +74,7 @@ class PlayScene(Scene):
             hudpos = (pos[0] - HUD_POS[0], pos[1] - HUD_POS[1])
             hud_event = self._hud.handle_mouse_up(hudpos)
             if (hud_event == hud.EVENT_NEXT):
-                if (self.levnum != MAX_LEVEL):
+                if (self.levnum != NUM_LEVELS):
                     self.levnum += 1
                     self.load_level()
             elif (hud_event == hud.EVENT_PREVIOUS):
@@ -300,7 +301,12 @@ class LevelCompleteScene(Scene):
         self.pscene = pscene
         if score.is_better(pscene.levnum, sc):
             score.update_high_scores(pscene.levnum, sc)
-            self.high = True
+            # don't show the 'high score text if we didn't save any
+            # bits!
+            if (self.pscene._board.nsaved > 0):
+                self.high = True
+            else:
+                self.high = False
         else:
             self.high = False
         self.played_high_sound = False
@@ -320,7 +326,7 @@ class LevelCompleteScene(Scene):
     def update(self, dt):
         self.tpassed += dt
         if self.tpassed > 3:
-            if (self.pscene.levnum == MAX_LEVEL):
+            if (self.pscene.levnum == NUM_LEVELS):
                 self.next = TitleScene(self.pscene.game)
             else:
                 self.pscene.levnum += 1

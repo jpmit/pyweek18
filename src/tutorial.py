@@ -5,7 +5,7 @@ import rstore
 import util
 
 # key is the level num
-_TUTSTEPS = {0: [
+_TUTSTEPS = {1: [
     # can split the the text over as many lines as we want, it will be
     # formatted
     ["Let me show you how to play.", []],
@@ -38,23 +38,30 @@ _TUTSTEPS = {0: [
     ["Try to save all 8 bits in each level, in as few moves as possible.", []],
     ["Your best score for the current level is shown on the right.", []],
     ["You can switch levels by clicking the arrow buttons on the right.", []],
-    ["And you can also reset the current level or return to the main menu.", []],
-    ["Good luck!", []]
+    ["And you can also reset the current level or return to the main menu.", []]
 ],
-             1: [
+             2: [
     ["Some of the 8 bits can be stronger than others.", []],
     ["Try moving the top bit up towards the goal cells.", [[3, 2]]],
     ["Move up towards the goal cells.", [[4, 1]]],
-    ["Aha! Those gun cells are out to get you.", []],
+    ["Ah! Those gun cells are out to get you.", []],
     ["They will shoot whenever a bit is in their line of sight.", []],
     ["When the value on the bit gets to zero, the bit is lost.", []],
     ["You can use the stronger bits to shield the weaker bits.", []],
     ["For example, you might try moving a weaker bit in behind the stronger bit...", []]
 ],
-             2: [
+             3: [
+                 ["Click on the flashing bit.", [[2, 3]]],
+                 ["Note that you can't move onto the gun cell to the bottom right of this cell.", []],
+                 ["Move the bit as indicated.", [[1, 4]]],
+                 ["Notice that the gun at the top can't shoot through the pink cell.", []]
+],
+             4: [
     ["One last thing.", []],
     ["If a goal cell has a number on it, it can save more than one bit.", []],
     ["The number tells you how many bits the goal can save.", []],
+    ["And that's all I've got.", []],
+    ["Good luck!", []]
 ]
 }
 

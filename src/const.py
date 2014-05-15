@@ -58,5 +58,5 @@ TUT_OFFSET = 4
 TUT_LINE_PAD = 4
 TUT_POS = (80, 400)
 
-# total number of levels is MAX_LEVEL + 1
-MAX_LEVEL = 11
+# note level indexes start at 1, so final level number is NUM_LEVELS
+NUM_LEVELS = 8

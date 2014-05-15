@@ -182,22 +182,48 @@ class GameBoard(object):
     def is_goal_cell(self, pos):
         return '{0}-{1}'.format(pos[0], pos[1]) in self._goal_cells
 
+    def wall_between(self, pos1, pos2):
+        # pos1 and pos2 should be on same row or column
+        if (pos1[0] == pos2[0]):
+            # same column
+            col = pos1[0]
+            topy = min(pos1[1], pos2[1])
+            bottomy = max(pos1[1], pos2[1])
+            for p in range(topy + 1, bottomy):
+                if self.get_cell([col, p]):
+                    return True
+        elif (pos1[1] == pos2[1]):
+            # same row
+            row = pos1[1]
+            leftx = min(pos1[0], pos2[0])
+            rightx = max(pos1[0], pos2[0])
+            for p in range(leftx + 1, rightx):
+                if self.get_cell([p, row]):
+                    return True
+
+        return False
+
     def can_hit(self, g):
         """Return true if gun cell can hit player, false otherwise."""
         direction = g.direction
         for p in self.get_cells_by_type(cell.C_PLAYER):
+            aligned = False
             if (direction == cell.D_UP):
                 if (g.pos[0] == p.pos[0]) and (g.pos[1] > p.pos[1]):
-                    return True
+                    aligned = True
             elif (direction == cell.D_DOWN):
                 if (g.pos[0] == p.pos[0]) and (g.pos[1] < p.pos[1]):
-                    return True
+                    aligned = True
             elif (direction == cell.D_LEFT):
                 if (g.pos[1] == p.pos[1]) and (g.pos[0] > p.pos[0]):
-                    return True
+                    aligned = True
             elif (direction == cell.D_RIGHT):
                 if (g.pos[1] == p.pos[1]) and (g.pos[0] < p.pos[0]):
-                    return True
+                    aligned = True
+            # a player cell is aligned with a gun cell, now we just
+            # need to check if a wall is in the way
+            if aligned and not self.wall_between(g.pos, p.pos):
+                return True
         return False
 
     def can_move(self):
