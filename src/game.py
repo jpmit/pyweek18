@@ -3,7 +3,7 @@ import pygame.locals as pl
 
 import rstore
 import score
-from scene import TitleScene, OptionsScene
+from scene import TitleScene, OptionsScene, PlayScene
 import tutorial
 import const
 
@@ -111,7 +111,7 @@ class Game(object):
     def mainloop(self):
 
         # first scene of the game
-        ascene = TitleScene(self)
+        ascene = PlayScene(self)#TitleScene(self)
 
         # initialize clock
         dt = self.clock.tick(const.FPS) / 1000.0

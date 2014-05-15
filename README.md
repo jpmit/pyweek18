@@ -30,6 +30,11 @@ Follow the in game tutorial system.  The game is played with the mouse
 only. Click on the tutorial text to advance the tutorial, or click on
 the flashing cell on the board.
 
+It is probably best to turn the tutorial off on the menu screen
+when/if you start playing 'for real'.
+
+High scores are saved locally.
+
 LICENSE:
 -------
 

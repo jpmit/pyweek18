@@ -63,11 +63,22 @@ class GunCellSprite(CellSprite):
 
 
 class GoalCellSprite(CellSprite):
-    def __init__(self, pos):
+    def __init__(self, pos, **kwargs):
         super(GoalCellSprite, self).__init__(pos)
         self.ctype = C_GOAL
-        self.image.fill(GCOL)
+        self.done = False
+        self.nbits = kwargs['nbits']
+        self.set_image()
 
+    def set_image(self):
+        self.image.fill(GCOL)
+        txt = rstore.fonts['main'].render(str(self.nbits), True, BLACK)
+        if (self.nbits > 1):
+            self.image.blit(txt, (0, 0))
+    
+    def decrement(self):
+        self.nbits -= 1
+        self.set_image()
 
 class ObstacleCellSprite(CellSprite):
     def __init__(self, pos):
@@ -181,4 +192,5 @@ IMAP = {'E': (C_GOAL, {}),
         '2': (C_PLAYER, {'health': 2}),
         '3': (C_PLAYER, {'health': 3}),
         '4': (C_PLAYER, {'health': 4}),
-        '5': (C_PLAYER, {'health': 5})}
+        '5': (C_PLAYER, {'health': 5}),
+        '6': (C_PLAYER, {'health': 6})}

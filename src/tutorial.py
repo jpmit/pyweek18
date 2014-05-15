@@ -50,6 +50,11 @@ _TUTSTEPS = {0: [
     ["When the value on the bit gets to zero, the bit is lost.", []],
     ["You can use the stronger bits to shield the weaker bits.", []],
     ["For example, you might try moving a weaker bit in behind the stronger bit...", []]
+],
+             2: [
+    ["One last thing.", []],
+    ["If a goal cell has a number on it, it can save more than one bit.", []],
+    ["The number tells you how many bits the goal can save.", []],
 ]
 }
 

@@ -101,20 +101,40 @@ class GameBoard(object):
         draw_grid(self._size)
 
     def read_board_state(self, fname):
+        # this is a bit of a mess after adding in variable goals in a hurry
         lines = open(fname, 'r').readlines()
         row = 0
-        self._size = (len(lines[0].strip()), len(lines))
         for line in lines:
+            full_line = line.strip()
+            line_len = len(full_line)
             col = 0
-            for c in line.strip():
+            cell_x = 0 # the current cell x position
+            while col < line_len:
+                # on each pass, we read the next cell
+                c = full_line[col]
                 if c != 'X':
                     ctype, kw = cell.IMAP[c] 
                     if c == 'E':
-                        self.add_goal_cell([col, row])
-                    else:
-                        self.add_cell([col, row], ctype, **kw)
+                        # read the next three characters to determine
+                        # if it is a 'multiple' goal.
+                        if (col == line_len - 1):
+                            nbits = 1
+                        else:
+                            if full_line[col + 1] == '(':
+                                nbits = int(full_line[col + 2])
+                            else:
+                                nbits = 1
+                        self.add_goal_cell([cell_x, row], **{'nbits': nbits})
+                        if (nbits > 1):
+                            col += 3
+                    else: # non goal cell
+                        self.add_cell([cell_x, row], ctype, **kw)
+                cell_x += 1
                 col += 1
             row += 1
+
+        # set the grid size based on final row!
+        self._size = (cell_x, row)
 
     def add_cell(self, pos, ctype, **kwargs):
         """Add a player/enemy cell."""
@@ -125,9 +145,9 @@ class GameBoard(object):
 
         self._cells['{0}-{1}'.format(pos[0], pos[1])] = c
 
-    def add_goal_cell(self, pos):
+    def add_goal_cell(self, pos, **kwargs):
         """Add a goal cell."""
-        c = cell.CMAP[cell.C_GOAL](pos)
+        c = cell.CMAP[cell.C_GOAL](pos, **kwargs)
         self._goal_cells['{0}-{1}'.format(pos[0], pos[1])] = c
 
     def add_move_cell(self, pos):
@@ -195,10 +215,12 @@ class GameBoard(object):
         if k in self._cells:
             del self._cells[k]
     
-    def remove_goal_cell(self, pos):
+    def decrement_goal_cell(self, pos):
         k = '{0}-{1}'.format(pos[0], pos[1])
         if k in self._goal_cells:
-            del self._goal_cells[k]
+            self._goal_cells[k].decrement()
+            if (self._goal_cells[k].nbits == 0):
+                del self._goal_cells[k]
 
     def get_cell_from_key(self, key):
         k = key.split('-')
@@ -278,7 +300,7 @@ class GameBoard(object):
         if self.is_goal_cell(pos):
             self.nsaved += 1
             # remove the goal cell (might take this out later)
-            self.remove_goal_cell(pos)
+            self.decrement_goal_cell(pos)
         else:
             self.add_cell(pos, cell.C_PLAYER, **{'health': c.health})
         # get rid of the move cells

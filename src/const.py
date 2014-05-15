@@ -10,6 +10,7 @@ PCOL = {
     3: '#28333b',
     4: '#2f4f4f',
     5: '#701010',
+    6: '#63260A',
     8: '#701010'
 }
 # possible move cells
@@ -58,4 +59,4 @@ TUT_LINE_PAD = 4
 TUT_POS = (80, 400)
 
 # total number of levels is MAX_LEVEL + 1
-MAX_LEVEL = 2
+MAX_LEVEL = 11

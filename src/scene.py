@@ -26,7 +26,7 @@ class PlayScene(Scene):
         self._board = board.GameBoard()
         self._hud = hud.Hud(self, self._board)
 
-        self.levnum = 0
+        self.levnum = 2
         self.load_level()
 
     def load_level(self, reset=False):
@@ -227,6 +227,7 @@ class PlayScene(Scene):
                     self._bullets.remove(b)
                     p.health -= 1
                     if (p.health == 0):
+                        self.game.juke.play_sfx('shatter')
                         self._board.nlost += 1
                         self._hud.set_lost(self._board.nlost)
                         self._board.remove_cell(p.pos)

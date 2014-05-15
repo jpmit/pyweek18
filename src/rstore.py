@@ -43,7 +43,8 @@ sfx = {'click': 'click.ogg',
        'turn': 'turn.ogg',
        'complete': 'complete2.ogg',
        'highscore': 'highscore.ogg',
-       'stranded': 'stranded.ogg'}
+       'stranded': 'stranded.ogg',
+       'shatter': 'shatter.ogg'}
 
 music = {'reawakening': 'reawakening.ogg'}
 
