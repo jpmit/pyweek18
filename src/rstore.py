@@ -12,7 +12,6 @@ _font_path = os.path.join(base_path, 'font')
 _sound_path = os.path.join(base_path, 'sound')
 
 images = {'bg': 'paper.png',
-          'goal': 'goal.png',
           'arrowleft': 'arrowleft.png',
           'arrowdown': 'arrowdown.png',
           'arrowright': 'arrowright.png',
