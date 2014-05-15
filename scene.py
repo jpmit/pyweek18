@@ -322,9 +322,12 @@ class LevelCompleteScene(Scene):
     def update(self, dt):
         self.tpassed += dt
         if self.tpassed > 3:
-            self.pscene.levnum += 1
-            self.pscene.load_level()
-            self.next = self.pscene
+            if (self.pscene.levnum == MAX_LEVEL):
+                self.next = TitleScene(self.pscene.game)
+            else:
+                self.pscene.levnum += 1
+                self.pscene.load_level()
+                self.next = self.pscene
 
     def render(self, screen):
         # keep rendering the play scene
@@ -548,7 +551,7 @@ class OptionsScene(TextClickingScene):
 class TitleScene(TextClickingScene):
     # name of button, position, whether it is selected, scene name it
     # leads to, how long to pause for before changing scene.
-    options = {'new': ['New Game', (220, 150), False, 'play', 0.8],
+    options = {'new': ['Play', (220, 150), False, 'play', 0.8],
                'options': ['Options', (220, 250), False, 'options'],
                'high': ['High Scores', (220, 350), False, 'high'],
                'quit': ['Quit', (220, 450), False, 'quit']}

@@ -9,7 +9,7 @@ _DEFAULT = {}
 # named constant for if the level hasn't been finished yet
 NO_SCORE = -1
 
-for i in range(MAX_LEVEL):
+for i in range(MAX_LEVEL + 1):
     # nsaved, nmoves
     _DEFAULT[i] = (NO_SCORE, NO_SCORE)
 

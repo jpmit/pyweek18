@@ -38,7 +38,7 @@ _TUTSTEPS = {0: [
     ["Try to save all 8 bits in each level, in as few moves as possible.", []],
     ["Your best score for the current level is shown on the right.", []],
     ["You can switch levels by clicking the arrow buttons on the right.", []],
-    ["And you can restart the current level at any point by clicking on the R button in the middle.", []],
+    ["And you can also reset the current level or return to the main menu.", []],
     ["Good luck!", []]
 ],
              1: [
