@@ -53,7 +53,8 @@ class Hud(object):
         self.largefont = rstore.fonts['hudlarge']
         self.set_data(0)
 
-        self.besttxt = self.smallfont.render('Best', True, _HUDCOL)
+        self.currenttxt = self.smallfont.render('Current', True, RED1)
+        self.besttxt = self.smallfont.render('Best', True, RED1)
 
         # images for previous level, next level, menu and reset
         self.surfaces = {}
@@ -106,7 +107,6 @@ class Hud(object):
 
         button_data[self.BUT_MAIN] = [main_not, main_sel, (arrow_width + pad, button_ypos + mid_but_height + vpad)]
         button_data[self.BUT_RESET] = [reset_not, reset_sel, (arrow_width + pad, button_ypos)]
-                                 
 
         for but, val in button_data.items():
             not_selected_surf = val[0]
@@ -160,11 +160,14 @@ class Hud(object):
         #hsurf.fill(_FILL_COL)
         hsurf.blit(rstore.images['hud'], (0, 0))
         hsurf.blit(self.levtxt, (_X_OFF, 0))
+        hsurf.blit(self.currenttxt, (_X_OFF, 60))
+        hsurf.blit(self.savetxt, (_X_OFF, 90))
+        #hsurf.blit(self.losttxt, (_X_OFF, 100))
         hsurf.blit(self.movtxt, (_X_OFF, 120))
-        hsurf.blit(self.savetxt, (_X_OFF, 150))
-        hsurf.blit(self.losttxt, (_X_OFF, 180))
-        hsurf.blit(self.besttxt, (_X_OFF, 220))
-        hsurf.blit(self.scoretxt, (_X_OFF, 240))
+        pygame.draw.line(hsurf, BLACK, (0, 160), (HUD_SIZE[0], 160), 4)
+        hsurf.blit(self.besttxt, (_X_OFF, 180))
+        hsurf.blit(self.best_saved_txt, (_X_OFF, 210))
+        hsurf.blit(self.best_moves_txt, (_X_OFF, 240))
 
         # draw buttons
         for but in self.surfaces:
@@ -180,7 +183,9 @@ class Hud(object):
         s0 = score.get_score_string(sc[0])
         s1 = score.get_score_string(sc[1])
             
-        self.scoretxt = self.smallfont.render('Saved: {0} Moves: {1}'.format(s0, s1),
+        self.best_saved_txt = self.smallfont.render('Bits saved: {0}'.format(s0),
+                                              True, _HUDCOL)
+        self.best_moves_txt = self.smallfont.render('Moves: {0}'.format(s1),
                                               True, _HUDCOL)
 
     def set_level(self, level):
